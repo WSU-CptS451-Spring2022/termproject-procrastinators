@@ -4,6 +4,7 @@
 #  if psycopg2 is not installed, install it using pip installer :  pip install psycopg2  (or pip3 install psycopg2) 
 import json
 import psycopg2
+import sys
 
 def cleanStr4SQL(s):
     return s.replace("'","`").replace("\n"," ")
@@ -67,9 +68,6 @@ def insert2Business(conn):
                                 + f" VALUES ('{cleanStr4SQL(k2)}', '{v2}', '{data['business_id']}')")
             except Exception as e:
                 print("Insert into Attributes failed!", e)
-
-            if count_line % 1000 == 0:
-                print(count_line)
 
             conn.commit()
 
@@ -192,18 +190,19 @@ def insert2CheckIns(conn):
     f.close()
 
 if __name__ == "__main__":
-    try: 
-        conn = psycopg2.connect(dbname="yelpdb", host="localhost", user="postgres", password="12345")
-        print('Starting insert2Business')
-        insert2Business(conn)          # DONE
-        print('Starting insert2Usr')
-        insert2Usr(conn)               # DONE
-        print('Starting insert2Tip')
-        insert2Tip(conn)               # DONE
-        print('starting insert2CheckIns')
-        insert2CheckIns(conn)          # DONE
-        conn.close()
-    except Exception as e:
-        print('Unable to connect to database', e)
-
-    
+    if len(sys.argv) >= 3:
+        try: 
+            conn = psycopg2.connect(dbname="yelpdb", host="localhost", user=sys.argv[1], password=sys.argv[2])
+            print('Starting insert2Business')
+            insert2Business(conn)          # DONE
+            print('Starting insert2Usr')
+            insert2Usr(conn)               # DONE
+            print('Starting insert2Tip')
+            insert2Tip(conn)               # DONE
+            print('starting insert2CheckIns')
+            insert2CheckIns(conn)          # DONE
+            conn.close()
+        except Exception as e:
+            print('Unable to connect to database', e)
+    else:
+        print('Please enter a user and password for a postgres db as command line arguements')
