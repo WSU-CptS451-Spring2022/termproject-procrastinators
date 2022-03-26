@@ -26,7 +26,10 @@ pip install -r requirements.txt
 ```
 
 ### Scripts
-To drop the yelpdb database, create a new one, and repopulate it, enter the following. Please note, that you will need the appropriate JSON files to be located in the DBPopulate directory.
+To drop the yelpdb database, create a new one, and repopulate it, enter the following. The script will then prompt for you for the name and password of the user you wish to log into psql with. If yelpdb already exists, the provided user will need to have permission to DROP the existing yelpdb. 
 ```
 .\restart.bat
 ```
+Please note, for the DB to populate coorectly, you will need the appropriate JSON files to be located in the DBPopulate folder.
+
+This process may take a while, as there is a lot of data to insert. The program should print start and finish statements for each JSON file it reads in.

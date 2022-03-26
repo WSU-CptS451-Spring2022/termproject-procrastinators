@@ -1,41 +1,45 @@
 
--- a. Whenever a user provides a tip for a business, the "numTips" value for that business
---    and the "tipCount" value for the user should be updated
-
-CREATE OR REPLACE FUNCTION iterate_vals() RETURNS trigger AS 
+-- When a tip is added, update the user's tipCount and the Businesses numTips counter
+CREATE OR REPLACE FUNCTION tipUpdate() RETURNS TRIGGER AS 
 $$
 BEGIN
-    UPDATE Usr, Business
-    SET tipCount = tipCount + 1, numTips = numTips + 1
-    WHERE Usr.usr_id = NEW.usr_id AND Business.business_id = NEW.business_id
+    UPDATE Usr SET tipCount = tipCount + 1 WHERE usr_id = NEW.usr_id;
+    UPDATE Business SET numTips = numTips + 1 WHERE business_id = NEW.business_id;
     RETURN NEW;
-END;
-$$
-LANGUAGE 'plpgsql';
+END
+$$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION iterate_numTips() RETURNS trigger AS
-$$
-BEGIN 
-    UPDATE Business
-    SET numTips = numTips + 1
-    WHERE Business.business_id = NEW.business_id;
-    RETURN NEW;
-END;
-$$ 
-LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE FUNCTION iterate_tipCount() RETURNS trigger AS
-$$
-BEGIN
-    UPDATE Usr
-    SET tipCount = tipCount + 1
-    WHERE Usr.usr_id = NEW.usr_id;
-    RETURN NEW;
-END;
-$$
-LANGUAGE 'plpgsql';
-
-CREATE TRIGGER TipAdded
+CREATE OR REPLACE TRIGGER tipAdded
 AFTER INSERT ON Tip
-FOR EACH ROW 
-EXECUTE PROCEDURE iterate_vals();
+FOR EACH ROW
+EXECUTE PROCEDURE tipUpdate();
+
+
+-- When a checkin is added, update the business's numCheckins counter
+CREATE OR REPLACE FUNCTION checkinUpdate() RETURNS TRIGGER AS
+$$
+BEGIN
+    UPDATE Business SET numCheckins = numCheckins + 1 WHERE business_id = NEW.business_id;
+END
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE TRIGGER checkinAdded
+AFTER INSERT ON CheckIns
+FOR EACH ROW
+EXECUTE PROCEDURE checkinUpdate();
+
+
+-- When likes of a tip is changed, update the user's total likes
+CREATE OR REPLACE FUNCTION likesUpdate() RETURNS TRIGGER AS
+$$
+BEGIN
+    UPDATE Usr SET totalLikes = totalLikes + NEW.likes - OLD.likes WHERE usr_id = NEW.usr_id;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER tipLikesChanged
+AFTER UPDATE ON Tip
+FOR EACH ROW
+EXECUTE PROCEDURE likesUpdate();
