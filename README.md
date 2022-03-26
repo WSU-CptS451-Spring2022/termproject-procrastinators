@@ -30,6 +30,6 @@ To drop the yelpdb database, create a new one, and repopulate it, enter the foll
 ```
 .\restart.bat
 ```
-Please note, for the DB to populate coorectly, you will need the appropriate JSON files to be located in the DBPopulate folder.
+Please note, for the DB to populate correctly, you will need the appropriate JSON files to be located in the DBPopulate folder.
 
 This process may take a while, as there is a lot of data to insert. The program should print start and finish statements for each JSON file it reads in.
