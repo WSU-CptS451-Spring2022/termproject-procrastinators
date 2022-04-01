@@ -143,7 +143,7 @@ namespace WpfApp1
         private void ziplist_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             catlist.Items.Clear();
-            if (citylist.SelectedIndex > -1)
+            if (ziplist.SelectedIndex > -1)
             {
                 using (var connection = new NpgsqlConnection(buildConnectionString()))
                 {
