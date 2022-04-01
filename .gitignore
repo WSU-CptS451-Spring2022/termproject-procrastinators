@@ -806,4 +806,8 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+*.JSON
+
+venv
+
 # End of https://www.toptal.com/developers/gitignore/api/csharp
