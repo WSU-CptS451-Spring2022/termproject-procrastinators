@@ -14,7 +14,8 @@
         <Label x:Name="ziplabel" FontSize="14" Content="ZIP Code" HorizontalAlignment="Left" Margin="21,163,0,0" VerticalAlignment="Top"/>
         <ComboBox x:Name="ziplist" HorizontalAlignment="Left" Margin="102,167,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="ziplist_SelectionChanged"/>
         <Label x:Name="catlabel" Content="Categories" FontSize="14" HorizontalAlignment="Left" Margin="11,217,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
-        <ComboBox x:Name="catlist" HorizontalAlignment="Left" Margin="102,221,0,0" VerticalAlignment="Top" Width="120"/>
+        <ComboBox x:Name="catlist" HorizontalAlignment="Left" Margin="102,221,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="catlist_SelectionChanged"/>
+        <DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="250,10,10,10" SelectionChanged="businessgrid_SelectionChanged"/>
 
     </Grid>
 </Window>
