@@ -192,7 +192,7 @@ namespace WpfApp1
             businessgrid.Items.Clear();
             nestedCommand = "";
 
-            if (citylist.SelectedIndex > -1)
+            if (ziplist.SelectedIndex > -1)
             {
                 using (var connection = new NpgsqlConnection(buildConnectionString()))
                 {
