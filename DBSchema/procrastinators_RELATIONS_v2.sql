@@ -61,7 +61,7 @@ CREATE TABLE Hrs (
 CREATE TABLE CheckIns (
     ci_year    INTEGER,
     ci_month   INTEGER,
-    ci_day     VARCHAR(10),
+    ci_day     INTEGER,
     ci_time    TIME,
     business_id VARCHAR(30),
     PRIMARY KEY (ci_year, ci_month, ci_day, ci_time, business_id),

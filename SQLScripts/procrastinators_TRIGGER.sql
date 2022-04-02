@@ -21,6 +21,7 @@ CREATE OR REPLACE FUNCTION checkinUpdate() RETURNS TRIGGER AS
 $$
 BEGIN
     UPDATE Business SET numCheckins = numCheckins + 1 WHERE business_id = NEW.business_id;
+    RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
 
@@ -36,6 +37,7 @@ CREATE OR REPLACE FUNCTION likesUpdate() RETURNS TRIGGER AS
 $$
 BEGIN
     UPDATE Usr SET totalLikes = totalLikes + NEW.likes - OLD.likes WHERE usr_id = NEW.usr_id;
+    RETURN NEW;
 END
 $$ LANGUAGE plpgsql;
 
