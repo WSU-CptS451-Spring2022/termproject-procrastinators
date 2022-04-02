@@ -90,8 +90,7 @@ def insert2Friend(conn, cur):
             try: # Insert Friends
                 for fri in data['friends']:
                     fri.replace('"', "'")
-                    if fri < data['user_id']:
-                        cur.execute(f"INSERT INTO Friend (friend_of, friend_for) VALUES ('{data['user_id']}', '{fri}')")
+                    cur.execute(f"INSERT INTO Friend (friend_of, friend_for) VALUES ('{data['user_id']}', '{fri}')")
             except Exception as e:
                 print("Insert to Friend failed!", e)
 
