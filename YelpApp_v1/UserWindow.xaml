@@ -5,8 +5,69 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="UserWindow" Height="450" Width="800">
+        Title="UserWindow" Height="600" Width="1000">
     <Grid>
-        
+        <!-- Lines for separation-->
+        <Line Stroke="Black" X1="182" Y1="0" 
+                               X2="182" Y2="280"/>
+        <Line Stroke="Black" X1="0" Y1="280"
+                                X2="430" Y2="280"/>
+        <Line Stroke="Black" X1="430" Y1="0"
+                                X2="430" Y2="600"/>
+
+        <!-- Set current user stuff -->
+        <Label x:Name="currentusrlabel" FontSize="14" Content="Set Current User" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,5,0,0" />
+        <TextBox x:Name="currentusrentry" HorizontalAlignment="Left" VerticalAlignment="Top" Width="159" Margin="10,36,0,0" KeyDown="enterName_KeyDown"/>
+        <DataGrid x:Name="usridgrid" Margin="10,70,831,320" Width="155" SelectionChanged="usridgrid_SelectionChanged" FontSize="12"/>
+
+
+
+        <!-- User information -->
+        <Label x:Name="usrinfolabel" FontSize="14" Content="User Information" Margin="189,5,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+
+        <Label x:Name="namelabel" FontSize="12" Content="Name: " HorizontalAlignment="Left" VerticalAlignment="Top" Margin="189,31,0,0"/>
+        <Label x:Name="name" FontSize="12" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="145" Margin="235,31,0,0" Height="26"/>
+
+        <Label x:Name="starslabel" FontSize="12" Content="Stars: " HorizontalAlignment="Left" VerticalAlignment="Top" Margin="189,57,0,0"/>
+        <Label x:Name="stars" FontSize="12" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="57" Margin="234,57,0,0" Height="24"/>
+
+        <Label x:Name="fanslabel" FontSize="12" Content="Fans: " HorizontalAlignment="Left" VerticalAlignment="Top" Margin="296,59,0,0"/>
+        <Label x:Name="fans" FontSize="12" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="57" Margin="340,59,0,0" Height="24"/>
+
+        <Label x:Name="yelpingsincelabel" FontSize="12" Content="Yelping Since: " HorizontalAlignment="Left" VerticalAlignment="Top" Margin="189,81,0,0"/>
+        <Label x:Name="yelpingsince" FontSize="10" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="119" Margin="278,81,0,0" Height="24" RenderTransformOrigin="0.638,0.576"/>
+
+        <Label x:Name="voteslabel" FontSize="12" Content="Votes: " HorizontalAlignment="Left" VerticalAlignment="Top" Margin="189,105,0,0"/>
+        <Label x:Name="funnylabel" FontSize="12" Content="funny" HorizontalAlignment="Left" VerticalAlignment="Top" Width="57" Margin="234,105,0,0" Height="24"/>
+        <Label x:Name="coollabel" FontSize="12" Content="cool" HorizontalAlignment="Left" VerticalAlignment="Top" Width="57" Margin="278,105,0,0" Height="24"/>
+        <Label x:Name="usefullabel" FontSize="12" Content="useful" HorizontalAlignment="Left" VerticalAlignment="Top" Width="57" Margin="323,106,0,0" Height="24"/>
+        <Label x:Name="funny" FontSize="12" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="36" Margin="237,126,0,0" Height="24"/>
+        <Label x:Name="cool" FontSize="12" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="36" Margin="278,126,0,0" Height="24"/>
+        <Label x:Name="useful" FontSize="12" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="36" Margin="327,126,0,0" Height="24"/>
+
+        <Label x:Name="tipcountlabel" FontSize="12" Content="Tip Count: " HorizontalAlignment="Left" VerticalAlignment="Top" Margin="189,150,0,0"/>
+        <Label x:Name="tipcount" FontSize="12" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="57" Margin="285,150,0,0" Height="24"/>
+
+        <Label x:Name="totaltiplikeslabel" FontSize="12" Content="Total Tip Likes: " HorizontalAlignment="Left" VerticalAlignment="Top" Margin="189,174,0,0"/>
+        <Label x:Name="totaltiplikes" FontSize="12" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="57" Margin="285,174,0,0" Height="24"/>
+
+        <Label x:Name="locationlabel" FontSize="12" Content="Location: " HorizontalAlignment="Left" VerticalAlignment="Top" Margin="189,198,0,0"/>
+        <Label x:Name="latlabel" FontSize="12" Content="lat: " HorizontalAlignment="Left" VerticalAlignment="Top" Margin="194,220,0,0"/>
+        <Label x:Name="longlabel" FontSize="12" Content="long: " HorizontalAlignment="Left" VerticalAlignment="Top" Margin="183,246,0,0"/>
+
+        <TextBox x:Name="latentry" Width="125" IsEnabled="False" Text="" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="232,224,0,0"/>
+        <TextBox x:Name="longentry" Width="125" IsEnabled="False" Text="" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="232,250,0,0"/>
+
+        <Button x:Name="editlocationbutton" Content="Edit" Click="editlocation" Height="20" Width="50" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="368,223,0,0"/>
+        <Button x:Name="updatelocationbutton" Content="Update" Click="updatelocation" Height="20" Width="50" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="368,250,0,0" />
+
+        <!-- Friends Grid -->
+        <Label x:Name="friendslabel" FontSize="14" Content="Friends" Margin="10,286,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <DataGrid x:Name="friendsgrid" FontSize="12" Margin="16,320,582,10" Width="400" SelectionChanged="friendsgrid_SelectionChanged"/>
+
+        <!-- Latest Tips Grid -->
+        <Label x:Name="latesttipslabel" FontSize="14" Content="Latest tips of my friends" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,397,0" />
+        <DataGrid x:Name="latesttipsgrid" FontSize="12" Margin="445,36,12,10" Width="543"/>
+
     </Grid>
 </Window>

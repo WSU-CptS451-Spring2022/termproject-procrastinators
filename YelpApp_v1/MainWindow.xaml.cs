@@ -32,36 +32,16 @@ namespace WpfApp1
 
         public string nestedCommand = "";
 
-        public class Business
-        {
-            public string bid { get; set; }
-            public string name { get; set; }
-            public string address { get; set; }
-            public string city { get; set; }
-            public string state { get; set; }
-            public int postal_code { get; set; }
-            public double latitude { get; set; }
-            public double longitude { get; set; }
-            public double stars { get; set; }
-            public int checkin_count { get; set; }
-            public int tip_count { get; set; }
-            public bool is_open { get; set; }
-        }
-
         public MainWindow()
         {
             InitializeComponent();
             addState();
             addColumnsToGrid();
         }
-        private string buildConnectionString()
-        {
-            return "Host = localhost; Username = postgres; Database =yelpdb; password = fabritzio";
-        }
 
         private void addState()
         {
-            using (var connection = new NpgsqlConnection(buildConnectionString()))
+            using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
             {
                 connection.Open();
                 using (var cmd = new NpgsqlCommand())
@@ -96,7 +76,7 @@ namespace WpfApp1
             {
 
 
-                using (var connection = new NpgsqlConnection(buildConnectionString()))
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
                 {
                     connection.Open();
                     using (var cmd = new NpgsqlCommand())
@@ -130,7 +110,7 @@ namespace WpfApp1
             ziplist.Items.Clear();
             if (citylist.SelectedIndex > -1)
             {
-                using (var connection = new NpgsqlConnection(buildConnectionString()))
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
                 {
                     connection.Open();
                     using (var cmd = new NpgsqlCommand())
@@ -194,7 +174,7 @@ namespace WpfApp1
 
             if (ziplist.SelectedIndex > -1)
             {
-                using (var connection = new NpgsqlConnection(buildConnectionString()))
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
                 {
                     connection.Open();
                     using (var cmd1 = new NpgsqlCommand())
@@ -269,7 +249,7 @@ namespace WpfApp1
             businessgrid.Items.Clear();
             if (catlist.SelectedIndex > -1)
             {
-                using (var connection = new NpgsqlConnection(buildConnectionString()))
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
                 {
                     connection.Open();
                     using (var cmd = new NpgsqlCommand())
@@ -342,6 +322,13 @@ namespace WpfApp1
                     BW.Show();
                 }
             }
+        }
+
+        private void switchToUserWindow(object sender, RoutedEventArgs e)
+        {
+            UserWindow UW = new UserWindow();
+            UW.Show();
+            this.Close();
         }
     }
 }

@@ -29,14 +29,7 @@ namespace WpfApp1
             loadBusinessDetails();
         }
 
-        public class Tip
-        {
-            public DateTime tipDate { get; set; } 
-            public string tipText { get; set; }
-            public int likes { get; set; }  
-            public string uid { get; set; }  
-            public string bid { get; set; }
-        }
+        
 
         private void addColumnsToGrid()
         {
@@ -62,7 +55,7 @@ namespace WpfApp1
         private void loadBusinessDetails()
         {
             tipgrid.Items.Clear();
-            using (var connection = new NpgsqlConnection(buildConnectionString()))
+            using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
             {
                 connection.Open();
                 using (var cmd = new NpgsqlCommand())
@@ -101,7 +94,7 @@ namespace WpfApp1
         {
             if (e.Key == Key.Enter)
             {
-                using (var connection = new NpgsqlConnection(buildConnectionString()))
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
                 {
                     connection.Open();
                     using (var cmd = new NpgsqlCommand())
@@ -125,11 +118,6 @@ namespace WpfApp1
                 }
             }
             loadBusinessDetails();
-        }
-
-        private string buildConnectionString()
-        {
-            return "Host = localhost; Username = postgres; Database =yelpdb; password = fabritzio";
         }
     }
 }
