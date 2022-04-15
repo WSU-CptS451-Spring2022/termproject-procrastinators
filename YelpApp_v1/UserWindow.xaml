@@ -19,7 +19,7 @@
         <Label x:Name="currentusrlabel" FontSize="14" Content="Set Current User" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,5,0,0" />
         <TextBox x:Name="currentusrentry" HorizontalAlignment="Left" VerticalAlignment="Top" Width="159" Margin="10,36,0,0" KeyDown="enterName_KeyDown"/>
         <DataGrid x:Name="usridgrid" Margin="10,70,831,320" Width="155" SelectionChanged="usridgrid_SelectionChanged" FontSize="12"/>
-
+        
 
 
         <!-- User information -->
