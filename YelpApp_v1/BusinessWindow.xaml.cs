@@ -119,5 +119,11 @@ namespace WpfApp1
             }
             loadBusinessDetails();
         }
+
+        private string buildConnectionString()
+        {
+            return "Host = localhost; Username = postgres; Database =yelpdb; password = 12345";
+        }
+
     }
 }
