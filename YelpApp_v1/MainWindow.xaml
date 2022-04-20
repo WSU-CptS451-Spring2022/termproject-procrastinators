@@ -5,18 +5,101 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="Yelp App" Height="450" Width="800">
+        Title="Yelp App" Height="750" Width="1200">
     <Grid>
-        <Button x:Name="usrbutton" Content="User Window" Click="switchToUserWindow" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="25,13,0,0"/>
-        <Label x:Name="statelabel" FontSize="16" Content="State" HorizontalAlignment="Left" Margin="34,51,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.06,0.503"/>
-        <ComboBox x:Name="statelist" HorizontalAlignment="Left" Margin="102,56,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="statelist_SelectionChanged"/>
-        <Label x:Name="citylabel" FontSize="14" Content="City" HorizontalAlignment="Left" Margin="46,115,0,0" VerticalAlignment="Top"/>
-        <ComboBox x:Name="citylist" HorizontalAlignment="Left" Margin="102,113,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="citylist_SelectionChanged"/>
-        <Label x:Name="ziplabel" FontSize="14" Content="ZIP Code" HorizontalAlignment="Left" Margin="21,163,0,0" VerticalAlignment="Top"/>
-        <ComboBox x:Name="ziplist" HorizontalAlignment="Left" Margin="102,167,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="ziplist_SelectionChanged"/>
-        <Label x:Name="catlabel" Content="Categories" FontSize="14" HorizontalAlignment="Left" Margin="11,217,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
-        <ComboBox x:Name="catlist" HorizontalAlignment="Left" Margin="102,221,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="catlist_SelectionChanged"/>
-        <DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="250,10,10,10" SelectionChanged="businessgrid_SelectionChanged"/>
+        <Label x:Name="statelabel" FontSize="16" Content="State" HorizontalAlignment="Left" Margin="16,34,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.06,0.503"/>
+        <Label x:Name="citylabel" FontSize="14" Content="City" HorizontalAlignment="Left" Margin="20,132,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.605,-1.27"/>
+        <Label x:Name="ziplabel" FontSize="14" Content="ZIP Code" HorizontalAlignment="Left" Margin="4,257,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="catlabel" Content="Categories" FontSize="14" HorizontalAlignment="Left" Margin="-1,354,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
+        <DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="250,10,421,0" SelectionChanged="businessgrid_SelectionChanged" Height="451" VerticalAlignment="Top"/>
+        <ListBox x:Name="statelist" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="73,14,955,630" SelectionChanged="statelist_SelectionChanged"/>
+        <ListBox x:Name="citylist" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="73,104,955,495" SelectionChanged="citylist_SelectionChanged"/>
+        <ListBox x:Name="ziplist" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="73,239,955,402" SelectionChanged="ziplist_SelectionChanged"/>
+        <ListBox x:Name="catlist" d:ItemsSource="{d:SampleData ItemCount=5}" RenderTransformOrigin="0.5,0.5" Margin="74,340,953,212" SelectionChanged="catlist_SelectionChanged" SelectionMode="Multiple">
+            <ListBox.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="-0.518"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </ListBox.RenderTransform>
+        </ListBox>
+        <Label x:Name="selectedlabel" Content="Categories Selected" HorizontalAlignment="Left" FontSize="14" Margin="67,541,0,0" VerticalAlignment="Top"/>
+        <ListBox x:Name="selectlist" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="20,575,955,53"/>
+        <GroupBox x:Name="price" Header="Filter By Price:"  FontSize="14"  Margin="809,22,32,593">
+            <Grid x:Name="innerprice" Height="90">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="74*"/>
+                    <ColumnDefinition Width="273*"/>
+                </Grid.ColumnDefinitions>
+                <CheckBox x:Name ="money1" Content="$" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name ="money2" Content="$$" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" RenderTransformOrigin="0.494,0.722" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name ="money3" Content="$$$" HorizontalAlignment="Left" Margin="57,10,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+                <CheckBox x:Name ="money4" Content="$$$$" HorizontalAlignment="Left" Margin="57,40,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Filter By Attributes:" FontSize="14" Margin="809,146,185,335">
+            <Grid x:Name="atcheck" Height="256">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="31*"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <CheckBox x:Name="credit" Content="Accepts Credit Cards" HorizontalAlignment="Left" Margin="0,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.118,-1.485"/>
+                <CheckBox x:Name="reservation" Content="Takes Reservations" HorizontalAlignment="Left" Margin="0,30,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="wheelchair" Content="Wheelchair Accessable" HorizontalAlignment="Left" Margin="0,50,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="outdoor" Content="Outdoor Seating" HorizontalAlignment="Left" Margin="2,0,0,160" VerticalAlignment="Bottom"/>
+                <CheckBox x:Name="kids" Content="Good For Kids" HorizontalAlignment="Left" Margin="0,90,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="groups" Content="Good For Groups" HorizontalAlignment="Left" Margin="0,111,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="delivery" Content="Delivery" HorizontalAlignment="Left" Margin="0,131,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="takeout" Content="Take Out" HorizontalAlignment="Left" Margin="0,151,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="wifi" Content="Free Wi-Fi" HorizontalAlignment="Left" Margin="0,171,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="bike" Content="Bike Parking" HorizontalAlignment="Left" Margin="0,191,0,0" VerticalAlignment="Top"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Filter By Meal:" FontSize="14" Margin="1015,146,5,335">
+            <Grid x:Name="mealcheck">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="25*"/>
+                    <ColumnDefinition Width="143*"/>
+                </Grid.ColumnDefinitions>
+                <CheckBox x:Name="breakfast" Content="Breakfast" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="lunch" Content="Lunch" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="brunch" Content="Brunch" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="dinner" Content="Dinner" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="dessert" Content="Dessert" HorizontalAlignment="Left" Margin="10,90,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="late" Content="Late Night" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox x:Name="sortby" Header="Sort Results By:" FontSize="14" Margin="809,404,131,255">
+            <ComboBox x:Name="sorted" HorizontalAlignment="Left" Margin="10,0,0,0" Width="223"/>
+        </GroupBox>
+        <GroupBox x:Name="currentbusiness"  FontSize="14" Header="Selected Buisness" Margin="264,471,81,27" RenderTransformOrigin="0.5,0.5">
+            <GroupBox.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleX="0.451"/>
+                    <RotateTransform/>
+                    <TranslateTransform X="-1.192"/>
+                </TransformGroup>
+            </GroupBox.RenderTransform>
+            <Grid x:Name="selectedbusiness">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="11*"/>
+                    <ColumnDefinition Width="485*"/>
+                    <ColumnDefinition Width="347*"/>
+                </Grid.ColumnDefinitions>
+                <Button Content="Show Checkins" HorizontalAlignment="Left" Margin="385,8,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+                <Button Content="Show Tips" HorizontalAlignment="Left" Margin="406,41,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+                <TextBlock x:Name ="businessname" Grid.Column="1" HorizontalAlignment="Left" Margin="4,10,0,0" TextWrapping="Wrap" Text="Business Name" VerticalAlignment="Top"/>
+                <TextBlock x:Name="addy" Grid.Column="1" HorizontalAlignment="Left" Margin="5,30,0,0" TextWrapping="Wrap" Text="Address" VerticalAlignment="Top"/>
+                <TextBlock x:Name="opcl" Grid.Column="1" HorizontalAlignment="Left" Margin="3,53,0,0" TextWrapping="Wrap" Text="Today:Opens/Closes" VerticalAlignment="Top"/>
+                <ListBox x:Name="selectcat" Grid.Column="2" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="14,35,170,9"/>
+                <ListBox x:Name="selectatt" Grid.Column="2" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="186,37,0,8"/>
+                <Label FontSize="14" Grid.Column="2" Content="Categories" HorizontalAlignment="Left" Margin="40,6,0,0" VerticalAlignment="Top" Width="97"/>
+                <Label FontSize="14" Grid.Column="2" Content="Attributes" HorizontalAlignment="Left" Margin="207,9,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.192,0.05" Width="70"/>
+            </Grid>
+        </GroupBox>
 
     </Grid>
 </Window>
