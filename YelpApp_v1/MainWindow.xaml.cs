@@ -43,13 +43,10 @@ namespace WpfApp1
             sorted.Items.Add("Most Checkins");
             sorted.Items.Add("Nearest");
         }
-<<<<<<< Updated upstream
-=======
         private string buildConnectionString()
         {
             return "Host = localhost; Username = postgres; Database =yelpdb; password = 12345";
         }
->>>>>>> Stashed changes
 
         private void addState()
         {
@@ -424,15 +421,12 @@ namespace WpfApp1
             }
         }
 
-<<<<<<< Updated upstream
         private void switchToUserWindow(object sender, RoutedEventArgs e)
         {
             UserWindow UW = new UserWindow();
             UW.Show();
             this.Close();
         }
-=======
->>>>>>> Stashed changes
     }
 }
 

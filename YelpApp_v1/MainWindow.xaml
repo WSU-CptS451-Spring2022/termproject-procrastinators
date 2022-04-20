@@ -7,18 +7,6 @@
         mc:Ignorable="d"
         Title="Yelp App" Height="750" Width="1200">
     <Grid>
-<<<<<<< Updated upstream
-        <Button x:Name="usrbutton" Content="User Window" Click="switchToUserWindow" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="25,13,0,0"/>
-        <Label x:Name="statelabel" FontSize="16" Content="State" HorizontalAlignment="Left" Margin="34,51,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.06,0.503"/>
-        <ComboBox x:Name="statelist" HorizontalAlignment="Left" Margin="102,56,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="statelist_SelectionChanged"/>
-        <Label x:Name="citylabel" FontSize="14" Content="City" HorizontalAlignment="Left" Margin="46,115,0,0" VerticalAlignment="Top"/>
-        <ComboBox x:Name="citylist" HorizontalAlignment="Left" Margin="102,113,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="citylist_SelectionChanged"/>
-        <Label x:Name="ziplabel" FontSize="14" Content="ZIP Code" HorizontalAlignment="Left" Margin="21,163,0,0" VerticalAlignment="Top"/>
-        <ComboBox x:Name="ziplist" HorizontalAlignment="Left" Margin="102,167,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="ziplist_SelectionChanged"/>
-        <Label x:Name="catlabel" Content="Categories" FontSize="14" HorizontalAlignment="Left" Margin="11,217,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
-        <ComboBox x:Name="catlist" HorizontalAlignment="Left" Margin="102,221,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="catlist_SelectionChanged"/>
-        <DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="250,10,10,10" SelectionChanged="businessgrid_SelectionChanged"/>
-=======
         <Label x:Name="statelabel" FontSize="16" Content="State" HorizontalAlignment="Left" Margin="16,34,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.06,0.503"/>
         <Label x:Name="citylabel" FontSize="14" Content="City" HorizontalAlignment="Left" Margin="20,132,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.605,-1.27"/>
         <Label x:Name="ziplabel" FontSize="14" Content="ZIP Code" HorizontalAlignment="Left" Margin="4,257,0,0" VerticalAlignment="Top"/>
@@ -112,7 +100,6 @@
                 <Label FontSize="14" Grid.Column="2" Content="Attributes" HorizontalAlignment="Left" Margin="207,9,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.192,0.05" Width="70"/>
             </Grid>
         </GroupBox>
->>>>>>> Stashed changes
 
     </Grid>
 </Window>
