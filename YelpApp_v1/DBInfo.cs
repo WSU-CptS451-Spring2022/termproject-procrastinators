@@ -24,6 +24,13 @@ namespace WpfApp1
 
     public class Business
     {
+        public Business()
+        {
+            attributes = new Dictionary<string, string>();
+            hrs = new Dictionary<string, (TimeSpan?, TimeSpan?)>();
+            categories = new List<string>();
+        }
+
         public string bid { get; set; }
         public string name { get; set; }
         public string address { get; set; }
@@ -36,7 +43,52 @@ namespace WpfApp1
         public int? checkin_count { get; set; }
         public int? tip_count { get; set; }
         public bool? is_open { get; set; }
+        public bool? is_visible { get; set; }
+        
+        // dictonary of attributes. 
+        // key      : category
+        // value    : attribute value. Most are true/false, but since some aren't, this needs to be a string :(
+        private Dictionary<string, string> attributes { get; set; }
+
+        // dictionary of business hours. 
+        // key : day of the week
+        // value : tuple(open time, close time)
+        private Dictionary<string, (TimeSpan?, TimeSpan?)> hrs { get; set; }
+
+        // list of categories applying to this business
+        private List<string> categories { get; set; }
+
+
+        public void insert_attribtue(string att, string val)
+        {
+            attributes.Add(att, val);
+        }
+
+        public void insert_category(string cat)
+        {
+            categories.Add(cat);
+        }
+
+        public void insert_hours(string day_of_week, TimeSpan? open, TimeSpan? close)
+        {
+            hrs.Add(day_of_week, (open, close));
+        }
+
+        public string get_attribute_val(string attr_name)
+        {
+            if (attributes.ContainsKey(attr_name))
+                return attributes[attr_name];
+            else return null;
+        }
+
+        public (TimeSpan?, TimeSpan?) get_hrs_of_day(string day)
+        {
+            if (hrs.ContainsKey(day))
+                return hrs[day];
+            else return (null, null);
+        }
     }
+
 
     public class Tip
     {
