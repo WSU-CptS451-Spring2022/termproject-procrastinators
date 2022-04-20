@@ -37,7 +37,19 @@ namespace WpfApp1
             InitializeComponent();
             addState();
             addColumnsToGrid();
+            sorted.Items.Add("Name(default)");
+            sorted.Items.Add("Highest Rated");
+            sorted.Items.Add("Most Number of Tips");
+            sorted.Items.Add("Most Checkins");
+            sorted.Items.Add("Nearest");
         }
+<<<<<<< Updated upstream
+=======
+        private string buildConnectionString()
+        {
+            return "Host = localhost; Username = postgres; Database =yelpdb; password = 12345";
+        }
+>>>>>>> Stashed changes
 
         private void addState()
         {
@@ -247,6 +259,7 @@ namespace WpfApp1
         private void catlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             businessgrid.Items.Clear();
+            selectlist.Items.Clear();
             if (catlist.SelectedIndex > -1)
             {
                 using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
@@ -305,6 +318,10 @@ namespace WpfApp1
                         {
                             connection.Close();
                         }
+                        for(int i = 0; i < catlist.SelectedItems.Count; i++)
+                        {
+                            selectlist.Items.Add(catlist.SelectedItems[i]);
+                        }
                     }
                 }
                 
@@ -313,8 +330,91 @@ namespace WpfApp1
 
         private void businessgrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            selectcat.Items.Clear();
+            selectatt.Items.Clear();
             if (businessgrid.SelectedIndex >= 0)
             {
+                Business test = businessgrid.Items[businessgrid.SelectedIndex] as Business;
+                businessname.Text = test.name;
+                addy.Text = test.address;
+                using (var connection = new NpgsqlConnection(buildConnectionString()))
+                {
+                    connection.Open();
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        string day = DateTime.Today.DayOfWeek.ToString();
+                        cmd.CommandText = "SELECT hrs.close, hrs.open FROM business, hrs WHERE hrs.dayofweek = '" + day + "' AND hrs.business_id = '" + test.bid+"'";
+                        try
+                        {
+                            var reader = cmd.ExecuteReader();
+                            while (reader.Read()){
+                                opcl.Text = "Today(" + DateTime.Today.DayOfWeek.ToString() + "): " + reader.GetTimeSpan(0) + " - " + reader.GetTimeSpan(1);
+                            }
+                        }
+                        catch (NpgsqlException ex)
+                        {
+                            Console.WriteLine(ex.Message.ToString());
+                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
+                        }
+                        finally
+                        {
+                            connection.Close();
+                        }
+                    }
+                }
+                using (var connection1 = new NpgsqlConnection(buildConnectionString()))
+                {
+                    connection1.Open();
+                    using (var cmd1 = new NpgsqlCommand())
+                    {
+                        cmd1.Connection = connection1;
+                        cmd1.CommandText = "SELECT category_name FROM categories WHERE business_id = '" + test.bid + "'";
+                        try
+                        {
+                            var reader1 = cmd1.ExecuteReader();
+                            while (reader1.Read())
+                            {
+                                selectcat.Items.Add(reader1.GetString(0));
+                            }
+                        }
+                        catch (NpgsqlException ex)
+                        {
+                            Console.WriteLine(ex.Message.ToString());
+                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
+                        }
+                        finally
+                        {
+                            connection1.Close();
+                        }
+                    }
+                }
+                using (var connection2 = new NpgsqlConnection(buildConnectionString()))
+                {
+                    connection2.Open();
+                    using (var cmd2 = new NpgsqlCommand())
+                    {
+                        cmd2.Connection = connection2;
+                        cmd2.CommandText = "SELECT attr_name FROM attributes WHERE business_id = '" + test.bid + "' AND val = 'True'";
+                        try
+                        {
+                            var reader2 = cmd2.ExecuteReader();
+                            while (reader2.Read())
+                            {
+                                selectatt.Items.Add(reader2.GetString(0));
+                            }
+                        }
+                        catch (NpgsqlException ex)
+                        {
+                            Console.WriteLine(ex.Message.ToString());
+                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
+                        }
+                        finally
+                        {
+                            connection2.Close();
+                        }
+                    }
+                }
                 Business B = businessgrid.Items[businessgrid.SelectedIndex] as Business;
                 if ((B.bid != null) && (B.bid.ToString().CompareTo("") != 0))
                 {
@@ -324,11 +424,15 @@ namespace WpfApp1
             }
         }
 
+<<<<<<< Updated upstream
         private void switchToUserWindow(object sender, RoutedEventArgs e)
         {
             UserWindow UW = new UserWindow();
             UW.Show();
             this.Close();
         }
+=======
+>>>>>>> Stashed changes
     }
 }
+
