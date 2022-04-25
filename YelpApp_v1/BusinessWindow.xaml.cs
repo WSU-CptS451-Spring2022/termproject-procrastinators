@@ -122,7 +122,7 @@ namespace WpfApp1
 
         private string buildConnectionString()
         {
-            return "Host = localhost; Username = postgres; Database =yelpdb; password = 12345";
+            return "Host = localhost; Username = postgres; Database =yelpdb; password = fabritzio";
         }
 
     }

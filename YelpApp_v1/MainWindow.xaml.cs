@@ -45,7 +45,7 @@ namespace WpfApp1
         }
         private string buildConnectionString()
         {
-            return "Host = localhost; Username = postgres; Database =yelpdb; password = 12345";
+            return "Host = localhost; Username = postgres; Database = yelpdb; password = fabritzio";
         }
 
         private void addState()
@@ -264,8 +264,9 @@ namespace WpfApp1
                     connection.Open();
                     using (var cmd = new NpgsqlCommand())
                     {
+                        /*
                         string relation = "business", n = "business";
-                        cmd.Connection = connection;
+                        
                         if(nestedCommand != "")
                         {
                             relation = nestedCommand;
@@ -283,6 +284,23 @@ namespace WpfApp1
                             "ORDER BY name";
 
                         nestedCommand = "(" + cmd.CommandText + ") AS nested";
+                        */
+                        cmd.Connection = connection;
+                        for (int i = 0; i < catlist.SelectedItems.Count; i++)
+                        {
+                            selectlist.Items.Add(catlist.SelectedItems[i]);
+                        }
+                        string query = "";
+                        query = "SELECT * FROM Business " +
+                            $"WHERE state = '{statelist.SelectedItem.ToString()}' " +
+                            $"AND city = '{citylist.SelectedItem.ToString()}' " +
+                            $"AND zipcode = {ziplist.SelectedItem.ToString()} ";
+                        for(int i = 0; i < selectlist.Items.Count; ++i)
+                        {
+                            query += $"AND Business.business_id IN (SELECT business_id FROM Categories WHERE category_name = '{selectlist.Items[i]}') ";
+                        }
+                        cmd.CommandText = query;
+
                         try
                         {
                             var reader = cmd.ExecuteReader();
@@ -314,10 +332,6 @@ namespace WpfApp1
                         finally
                         {
                             connection.Close();
-                        }
-                        for(int i = 0; i < catlist.SelectedItems.Count; i++)
-                        {
-                            selectlist.Items.Add(catlist.SelectedItems[i]);
                         }
                     }
                 }
@@ -412,10 +426,30 @@ namespace WpfApp1
                         }
                     }
                 }
+            }
+        }
+        
+        private void tipsbutton_Click(object sender, EventArgs e)
+        {
+            if (businessgrid.SelectedIndex >= 0)
+            {
                 Business B = businessgrid.Items[businessgrid.SelectedIndex] as Business;
                 if ((B.bid != null) && (B.bid.ToString().CompareTo("") != 0))
                 {
                     BusinessWindow BW = new BusinessWindow(B.bid.ToString());
+                    BW.Show();
+                }
+            }
+        }
+
+        private void checkinsbutton_Click(object sender, EventArgs e)
+        {
+            if (businessgrid.SelectedIndex >= 0)
+            {
+                Business B = businessgrid.Items[businessgrid.SelectedIndex] as Business;
+                if ((B.bid != null) && (B.bid.ToString().CompareTo("") != 0))
+                {
+                    CheckInWindow BW = new CheckInWindow(B.bid.ToString());
                     BW.Show();
                 }
             }

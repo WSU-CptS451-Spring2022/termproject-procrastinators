@@ -51,7 +51,7 @@ namespace WpfApp1
     {
         private static string host = "localhost";
         private static string username = "postgres";
-        private static string password = "123";
+        private static string password = "fabritzio";
         private static string database = "yelpdb";
 
         public static string buildConnectionString()
