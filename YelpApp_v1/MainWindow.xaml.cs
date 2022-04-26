@@ -189,7 +189,7 @@ namespace WpfApp1
                                 newBus.tip_count = reader["numtips"] as int?;
                                 newBus.is_open = reader["is_open"] as bool?;
                                 newBus.is_visible = true;
-                                newBus.calc_distance(UserWindow.selectedUser);
+                                
                                 _bus.Add(newBus.bid, newBus);
                             }
                         }
@@ -207,22 +207,33 @@ namespace WpfApp1
                         {
                             while (reader.Read())
                             {
-                                _bus[reader["bid"] as string].insert_category(reader["c_name"] as string);
                                 categories.Add(reader["c_name"] as string);
                             }
                         }
                     }
 
+                    User u = UserWindow.selectedUser;
                     foreach (Business bus in _bus.Values)
                     {
-                        using (var cmd = new NpgsqlCommand("SELECT * " +
-                                                           "FROM Attributes " +
-                                                          $"WHERE business_id = '{bus.bid}';", connection))
+                        if (u != null)
                         {
-                            using (var reader = cmd.ExecuteReader())
+                            if (u.latitude != null && u.longitude != null)
                             {
-                                if (reader.Read())
-                                    bus.insert_attribtue(reader["attr_name"] as string, reader["val"] as string);
+                                // This way of finding the distance was found here : https://stackoverflow.com/questions/61135374/postgresql-calculate-distance-between-two-points-without-using-postgis
+                                using (var cmd = new NpgsqlCommand($"SELECT SQRT(POW(69.1 * (B.latitude - {u.latitude}), 2) " +
+                                                                             $"+ POW(69.1 * ({u.longitude} - B.longitude) * COS(B.latitude / 57.3), 2)) as distance " +
+                                                                   "FROM Business AS B " +
+                                                                   $"WHERE B.business_id = '{bus.bid}';", connection))
+                                {
+                                    using (var reader = cmd.ExecuteReader())
+                                    {
+                                        if (reader.Read())
+                                        {
+                                            bus.distance = Math.Round((double)(reader["distance"] as double?), 2);
+                                        }
+                                    }
+                                }
+
                             }
                         }
                         using (var cmd = new NpgsqlCommand("SELECT * " +
@@ -231,30 +242,24 @@ namespace WpfApp1
                         {
                             using (var reader = cmd.ExecuteReader())
                             {
-                                if (reader.Read())
+                                while (reader.Read())
                                     bus.insert_hours(reader["dayofweek"] as string, reader["open"] as TimeSpan?, reader["close"] as TimeSpan?);
                             }
                         }
                     }
 
-                    foreach (Business bus in _bus.Values)
-                    {
-                        businessgrid.Items.Add(bus);
-                    }
+                    
 
                     categories = categories.Distinct().ToList();
                     foreach (string c in categories)
                     {
                         catlist.Items.Add(c);
                     }
+
+                    query_filters();
                 }
                 numbusinesses.Content = businessgrid.Items.Count;
             }
-        }
-
-        private void catlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            query_filters();
         }
 
         private void businessgrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -263,35 +268,19 @@ namespace WpfApp1
             selectatt.Items.Clear();
             if (businessgrid.SelectedIndex >= 0)
             {
-                Business test = businessgrid.Items[businessgrid.SelectedIndex] as Business;
+                Business test = businessgrid.SelectedItem as Business;
                 businessname.Text = test.name;
+                
                 addy.Text = test.address;
-                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
+                (TimeSpan?, TimeSpan?) hrs = test.get_hrs_of_day(DateTime.Today.DayOfWeek.ToString());
+                if (hrs.Item1 != null && hrs.Item2 != null)
                 {
-                    connection.Open();
-                    using (var cmd = new NpgsqlCommand())
-                    {
-                        cmd.Connection = connection;
-                        string day = DateTime.Today.DayOfWeek.ToString();
-                        cmd.CommandText = "SELECT hrs.close, hrs.open FROM business, hrs WHERE hrs.dayofweek = '" + day + "' AND hrs.business_id = '" + test.bid+"'";
-                        try
-                        {
-                            var reader = cmd.ExecuteReader();
-                            while (reader.Read()){
-                                opcl.Text = "Today(" + DateTime.Today.DayOfWeek.ToString() + "): " + reader.GetTimeSpan(0) + " - " + reader.GetTimeSpan(1);
-                            }
-                        }
-                        catch (NpgsqlException ex)
-                        {
-                            Console.WriteLine(ex.Message.ToString());
-                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
-                        }
-                        finally
-                        {
-                            connection.Close();
-                        }
-                    }
+                    opcl.Text = $"Today ( {DateTime.Today.DayOfWeek} ) : {hrs.Item1.ToString()} {hrs.Item2.ToString()}";
                 }
+                else
+                    opcl.Text = $"Today ( {DateTime.Today.DayOfWeek} ) : Closed";
+
+
                 using (var connection1 = new NpgsqlConnection(DBInfo.buildConnectionString()))
                 {
                     connection1.Open();
@@ -391,43 +380,71 @@ namespace WpfApp1
             query_filters();
         }
 
+        /// <summary>
+        /// This entire function is an abomination. I'm sorry in advance to whoever has to read this.
+        /// </summary>
         private void query_filters()
         {
             businessgrid.Items.Clear();
-            string query = "SELECT DISTINCT business_id FROM Business WHERE ";
+            string query = "SELECT DISTINCT * FROM Business WHERE ";
+            bool filter_added = false;
             string at = atcheck_query();
             if (at != "")
             {
                 query += at + " AND ";
+                filter_added = true;
             }
 
             string meal = meal_filter_query();
             if (meal != "")
             {
                 query += meal + " AND ";
+                filter_added = true;
             }
 
             string price = price_filter_query();
             if (price != "")
             {
-                // trailing end is added here to ensure that following remove can always be called
                 query += price + " AND ";
+                filter_added = true;
             }
 
             // Filter categories
-            for (int i = 0; i < catlist.SelectedItems.Count; ++i)
-            {
-                selectlist.Items.Add(catlist.SelectedItems[i]);
-            }
-
             for (int i = 0; i < selectlist.Items.Count; ++i)
             {
                 query += $"business_id IN (SELECT business_id FROM Categories WHERE category_name = '{selectlist.Items[i]}') AND ";
+                filter_added = true;
             }
 
-            query = query.Remove(query.Length - 4);
+            // This removes either the trailing AND or, in the case of no filters being added, removes the WHERE (not removing the where will
+            //                                                                                                    cause a crash when adding ORDER BY)
+            if (filter_added == true)
+                query = query.Remove(query.Length - 4);
+            else
+                query = query.Remove(query.Length - 6);
 
-            Trace.WriteLine(query);
+            // add order by
+            if (sorted.SelectedItem.ToString() == "Highest Rated")
+                query += " ORDER BY stars DESC";
+            else if (sorted.SelectedItem.ToString() == "Most Number of Tips")
+                query += " ORDER BY numTips DESC";
+            else if (sorted.SelectedItem.ToString() == "Most Checkins")
+                query += " ORDER BY numCheckins DESC";
+            else if (sorted.SelectedItem.ToString() == "Nearest") // I'm sorry
+            {
+                User u = UserWindow.selectedUser;
+                if (u != null)
+                {
+                    if (u.latitude != null && u.longitude != null)
+                    {
+                        int i = query.IndexOf("*");
+                        query = query.Insert(i + 1, $", SQRT(POW(69.1 * (Business.latitude - {u.latitude}), 2) + POW(69.1 * ({u.longitude} - Business.longitude) * COS(Business.latitude / 57.3), 2)) as distance ");
+                        query += " ORDER BY distance";
+                    }
+                }
+            }
+            else
+                query += " ORDER BY name ASC";
 
             using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
             {
@@ -521,6 +538,34 @@ namespace WpfApp1
             }
 
             return query;
+        }
+
+        private void sorted_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            query_filters();
+        }
+
+        private void addbutton_Click(object sender, RoutedEventArgs e)
+        {
+            if (catlist.SelectedItem != null)
+            {
+                foreach (string s in selectlist.Items )
+                {
+                    if (s == catlist.SelectedItem.ToString())
+                        return;
+                }
+                selectlist.Items.Add(catlist.SelectedItem);
+                query_filters();
+            }
+        }
+
+        private void removebutton_Click(object sender, RoutedEventArgs e)
+        {
+            if (selectlist.SelectedItem != null)
+            {
+                selectlist.Items.Remove(selectlist.SelectedItem);
+                query_filters();
+            }
         }
     }
 }
