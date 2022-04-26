@@ -27,9 +27,7 @@ namespace WpfApp1
     {
         public Business()
         {
-            attributes = new Dictionary<string, string>();
             hrs = new Dictionary<string, (TimeSpan?, TimeSpan?)>();
-            categories = new List<string>();
         }
 
         public string bid { get; set; }
@@ -48,40 +46,15 @@ namespace WpfApp1
 
         public double? distance { get; set; }
 
-        // dictonary of attributes. 
-        // key      : category
-        // value    : attribute value. Most are true/false, but since some aren't, this needs to be a string :(
-        private Dictionary<string, string> attributes { get; set; }
 
         // dictionary of business hours. 
         // key : day of the week
         // value : tuple(open time, close time)
         private Dictionary<string, (TimeSpan?, TimeSpan?)> hrs { get; set; }
 
-        // list of categories applying to this business
-        private List<string> categories { get; set; }
-
-
-        public void insert_attribtue(string att, string val)
-        {
-            attributes.Add(att, val);
-        }
-
-        public void insert_category(string cat)
-        {
-            categories.Add(cat);
-        }
-
         public void insert_hours(string day_of_week, TimeSpan? open, TimeSpan? close)
         {
             hrs.Add(day_of_week, (open, close));
-        }
-
-        public string get_attribute_val(string attr_name)
-        {
-            if (attributes.ContainsKey(attr_name))
-                return attributes[attr_name];
-            else return null;
         }
 
         public (TimeSpan?, TimeSpan?) get_hrs_of_day(string day)
@@ -89,27 +62,6 @@ namespace WpfApp1
             if (hrs.ContainsKey(day))
                 return hrs[day];
             else return (null, null);
-        }
-
-        public void calc_distance(User u)
-        {
-            if (u == null)
-            {
-                distance = null;
-                return;
-            }
-            if (u.latitude == null || u.longitude == null)
-            {
-                distance = null;
-                return;
-            }
-            else
-            {
-                // calc distance
-                var cord1 = new GeoCoordinate((double)u.latitude, (double)u.longitude);
-                var cord2 = new GeoCoordinate((double)latitude, (double)longitude);
-                distance = Math.Round(cord1.GetDistanceTo(cord2) / 1609.344, 2);
-            }
         }
     }
 
