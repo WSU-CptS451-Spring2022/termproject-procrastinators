@@ -11,13 +11,20 @@
         <Label x:Name="citylabel" FontSize="14" Content="City" HorizontalAlignment="Left" Margin="20,132,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.605,-1.27"/>
         <Label x:Name="ziplabel" FontSize="14" Content="ZIP Code" HorizontalAlignment="Left" Margin="4,257,0,0" VerticalAlignment="Top"/>
         <Label x:Name="catlabel" Content="Categories" FontSize="14" HorizontalAlignment="Left" Margin="-1,354,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
-        <!--<DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="250,10,421,0" SelectionChanged="businessgrid_SelectionChanged" Height="451" VerticalAlignment="Top"/>-->
-        <DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" AlternatingRowBackground="AliceBlue" Margin="250,10,421,0" SelectionChanged="businessgrid_SelectionChanged" Height="451" VerticalAlignment="Top">
+
+        <Label x:Name="numbusinesseslabel" Content="# of businesses: " FontSize="14" HorizontalAlignment="Left" Margin="263,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
+        <Label x:Name="numbusinesses" Content="" FontSize="14" HorizontalAlignment="Left" Margin="374,12,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
+
+        <DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" AlternatingRowBackground="AliceBlue" Margin="250,41,421,0" SelectionChanged="businessgrid_SelectionChanged" Height="451" VerticalAlignment="Top">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Business Name" Binding = "{Binding name}" />
                 <DataGridTextColumn Header="Address" Binding = "{Binding address}" />
+                <DataGridTextColumn Header="City" Binding = "{Binding city}" />
+                <DataGridTextColumn Header="State" Binding = "{Binding state}" />
+                <DataGridTextColumn Header="Distance" Binding="{Binding distance}" />
                 <DataGridTextColumn Header="Stars" Binding = "{Binding stars}" />
                 <DataGridTextColumn Header="Tips" Binding = "{Binding tip_count}" />
+                <DataGridTextColumn Header="Total Checkins" Binding="{Binding checkin_count}" />
             </DataGrid.Columns>
         </DataGrid>
         <ListBox x:Name="statelist" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="73,14,955,630" SelectionChanged="statelist_SelectionChanged"/>
@@ -41,10 +48,10 @@
                     <ColumnDefinition Width="74*"/>
                     <ColumnDefinition Width="273*"/>
                 </Grid.ColumnDefinitions>
-                <CheckBox x:Name ="money1" Content="$" Click="money_filter" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-                <CheckBox x:Name ="money2" Content="$$" Click="money_filter" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" RenderTransformOrigin="0.494,0.722" Grid.ColumnSpan="2"/>
-                <CheckBox x:Name ="money3" Content="$$$" Click="money_filter" HorizontalAlignment="Left" Margin="57,10,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-                <CheckBox x:Name ="money4" Content="$$$$" Click="money_filter" HorizontalAlignment="Left" Margin="57,40,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+                <CheckBox x:Name ="money1" Content="$" Click="filter_changed" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name ="money2" Content="$$" Click="filter_changed" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" RenderTransformOrigin="0.494,0.722" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name ="money3" Content="$$$" Click="filter_changed" HorizontalAlignment="Left" Margin="57,10,0,0" VerticalAlignment="Top" Grid.Column="1"/>
+                <CheckBox x:Name ="money4" Content="$$$$" Click="filter_changed" HorizontalAlignment="Left" Margin="57,40,0,0" VerticalAlignment="Top" Grid.Column="1"/>
             </Grid>
         </GroupBox>
         <GroupBox x:Name="attributes" Header="Filter By Attributes:" FontSize="14" Margin="809,146,185,335">
@@ -53,16 +60,16 @@
                     <RowDefinition Height="31*"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <CheckBox x:Name="credit" Content="Accepts Credit Cards" HorizontalAlignment="Left" Margin="0,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.118,-1.485"/>
-                <CheckBox x:Name="reservation" Content="Takes Reservations" HorizontalAlignment="Left" Margin="0,30,0,0" VerticalAlignment="Top"/>
-                <CheckBox x:Name="wheelchair" Content="Wheelchair Accessable" HorizontalAlignment="Left" Margin="0,50,0,0" VerticalAlignment="Top"/>
-                <CheckBox x:Name="outdoor" Content="Outdoor Seating" HorizontalAlignment="Left" Margin="2,0,0,160" VerticalAlignment="Bottom"/>
-                <CheckBox x:Name="kids" Content="Good For Kids" HorizontalAlignment="Left" Margin="0,90,0,0" VerticalAlignment="Top"/>
-                <CheckBox x:Name="groups" Content="Good For Groups" HorizontalAlignment="Left" Margin="0,111,0,0" VerticalAlignment="Top"/>
-                <CheckBox x:Name="delivery" Content="Delivery" HorizontalAlignment="Left" Margin="0,131,0,0" VerticalAlignment="Top"/>
-                <CheckBox x:Name="takeout" Content="Take Out" HorizontalAlignment="Left" Margin="0,151,0,0" VerticalAlignment="Top"/>
-                <CheckBox x:Name="wifi" Content="Free Wi-Fi" HorizontalAlignment="Left" Margin="0,171,0,0" VerticalAlignment="Top"/>
-                <CheckBox x:Name="bike" Content="Bike Parking" HorizontalAlignment="Left" Margin="0,191,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="BusinessAcceptsCreditCards" Content="Accepts Credit Cards" Click="filter_changed" HorizontalAlignment="Left" Margin="0,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.118,-1.485"/>
+                <CheckBox x:Name="RestaurantsReservations" Content="Takes Reservations" Click="filter_changed" HorizontalAlignment="Left" Margin="0,30,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="WheelchairAccessible" Content="Wheelchair Accessable" Click="filter_changed" HorizontalAlignment="Left" Margin="0,50,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="OutdoorSeating" Content="Outdoor Seating" Click="filter_changed" HorizontalAlignment="Left" Margin="2,0,0,160" VerticalAlignment="Bottom"/>
+                <CheckBox x:Name="GoodForKids" Content="Good For Kids" Click="filter_changed" HorizontalAlignment="Left" Margin="0,90,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="RestaurantsGoodForGroups" Content="Good For Groups" Click="filter_changed" HorizontalAlignment="Left" Margin="0,111,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="RestaurantsDelivery" Content="Delivery" Click="filter_changed" HorizontalAlignment="Left" Margin="0,131,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="RestaurantsTakeOut" Content="Take Out" Click="filter_changed" HorizontalAlignment="Left" Margin="0,151,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="WiFi" Content="Free Wi-Fi" Click="filter_changed" HorizontalAlignment="Left" Margin="0,171,0,0" VerticalAlignment="Top"/>
+                <CheckBox x:Name="BikeParking" Content="Bike Parking" Click="filter_changed" HorizontalAlignment="Left" Margin="0,191,0,0" VerticalAlignment="Top"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="Filter By Meal:" FontSize="14" Margin="1015,146,5,335">
@@ -71,18 +78,18 @@
                     <ColumnDefinition Width="25*"/>
                     <ColumnDefinition Width="143*"/>
                 </Grid.ColumnDefinitions>
-                <CheckBox x:Name="breakfast" Content="Breakfast" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-                <CheckBox x:Name="lunch" Content="Lunch" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-                <CheckBox x:Name="brunch" Content="Brunch" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-                <CheckBox x:Name="dinner" Content="Dinner" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-                <CheckBox x:Name="dessert" Content="Dessert" HorizontalAlignment="Left" Margin="10,90,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-                <CheckBox x:Name="late" Content="Late Night" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="breakfast" Content="Breakfast" Click="filter_changed" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="lunch" Content="Lunch" Click="filter_changed" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="brunch" Content="Brunch" Click="filter_changed" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="dinner" Content="Dinner" Click="filter_changed" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="dessert" Content="Dessert" Click="filter_changed" HorizontalAlignment="Left" Margin="10,90,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <CheckBox x:Name="latenight" Content="Late Night" Click="filter_changed" HorizontalAlignment="Left" Margin="10,110,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
             </Grid>
         </GroupBox>
         <GroupBox x:Name="sortby" Header="Sort Results By:" FontSize="14" Margin="809,404,131,255">
             <ComboBox x:Name="sorted" HorizontalAlignment="Left" Margin="10,0,0,0" Width="223"/>
         </GroupBox>
-        <GroupBox x:Name="currentbusiness"  FontSize="14" Header="Selected Buisness" Margin="264,471,81,27" RenderTransformOrigin="0.5,0.5">
+        <GroupBox x:Name="currentbusiness"  FontSize="14" Header="Selected Buisness" Margin="264,491,81,7" RenderTransformOrigin="0.5,0.5">
             <GroupBox.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -91,7 +98,7 @@
                     <TranslateTransform X="-1.192"/>
                 </TransformGroup>
             </GroupBox.RenderTransform>
-            <Grid x:Name="selectedbusiness">
+            <Grid x:Name="selectedbusiness" Margin="-3,0,3,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="11*"/>
                     <ColumnDefinition Width="485*"/>
@@ -101,7 +108,7 @@
                 <Button x:Name="tipsbutton" Content="Show Tips" HorizontalAlignment="Left" Margin="406,41,0,0" VerticalAlignment="Top" Grid.Column="1" Click="tipsbutton_Click"/>
                 <TextBlock x:Name ="businessname" Grid.Column="1" HorizontalAlignment="Left" Margin="4,10,0,0" TextWrapping="Wrap" Text="Business Name" VerticalAlignment="Top"/>
                 <TextBlock x:Name="addy" Grid.Column="1" HorizontalAlignment="Left" Margin="5,30,0,0" TextWrapping="Wrap" Text="Address" VerticalAlignment="Top"/>
-                <TextBlock x:Name="opcl" Grid.Column="1" HorizontalAlignment="Left" Margin="3,53,0,0" TextWrapping="Wrap" Text="Today:Opens/Closes" VerticalAlignment="Top"/>
+                <TextBlock x:Name="opcl" Grid.Column="1" HorizontalAlignment="Left" Margin="3,53,0,0" TextWrapping="Wrap" Text="Today:" VerticalAlignment="Top"/>
                 <ListBox x:Name="selectcat" Grid.Column="2" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="14,35,170,9"/>
                 <ListBox x:Name="selectatt" Grid.Column="2" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="186,37,0,8"/>
                 <Label FontSize="14" Grid.Column="2" Content="Categories" HorizontalAlignment="Left" Margin="40,6,0,0" VerticalAlignment="Top" Width="97"/>

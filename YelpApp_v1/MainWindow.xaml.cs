@@ -156,6 +156,7 @@ namespace WpfApp1
             catlist.Items.Clear();
             businessgrid.Items.Clear();
             _bus.Clear();
+            List<string> categories = new List<string>();
             nestedCommand = "";
 
             if (ziplist.SelectedIndex > -1)
@@ -188,7 +189,7 @@ namespace WpfApp1
                                 newBus.tip_count = reader["numtips"] as int?;
                                 newBus.is_open = reader["is_open"] as bool?;
                                 newBus.is_visible = true;
-
+                                newBus.calc_distance(UserWindow.selectedUser);
                                 _bus.Add(newBus.bid, newBus);
                             }
                         }
@@ -207,7 +208,7 @@ namespace WpfApp1
                             while (reader.Read())
                             {
                                 _bus[reader["bid"] as string].insert_category(reader["c_name"] as string);
-                                catlist.Items.Add(reader["c_name"]);
+                                categories.Add(reader["c_name"] as string);
                             }
                         }
                     }
@@ -240,94 +241,20 @@ namespace WpfApp1
                     {
                         businessgrid.Items.Add(bus);
                     }
-                }
-            }
-        }
-        private void catlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            businessgrid.Items.Clear();
-            selectlist.Items.Clear();
-            if (catlist.SelectedIndex > -1)
-            {
-                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
-                {
-                    connection.Open();
-                    using (var cmd = new NpgsqlCommand())
+
+                    categories = categories.Distinct().ToList();
+                    foreach (string c in categories)
                     {
-                        /*
-                        string relation = "business", n = "business";
-                        
-                        if(nestedCommand != "")
-                        {
-                            relation = nestedCommand;
-                            n = "nested";
-                        }
-
-                        cmd.CommandText = "SELECT " + n + ".business_id, " + n + ".name, " + n + ".address, " + n + ".city, " + n + ".state, " + n + ".zipcode, " + n +
-                            ".latitude, " + n + ".longitude, " + n + ".stars, " + n + ".numCheckins, " + n + ".numTips, " + n + ".is_open, categories.category_name " +
-                            "FROM " + relation + ", categories " +
-                            "WHERE " + n + ".business_id = categories.business_id " +
-                            "AND " + n + ".state = '" + statelist.SelectedItem.ToString() + "' " +
-                            "AND " + n + ".city = '" + citylist.SelectedItem.ToString() + "' " +
-                            "AND " + n + ".zipcode = " + ziplist.SelectedItem.ToString() + " " +
-                            "AND categories.category_name = '" + catlist.SelectedItem.ToString() + "' " +
-                            "ORDER BY name";
-
-                        nestedCommand = "(" + cmd.CommandText + ") AS nested";
-                        */
-                        cmd.Connection = connection;
-                        for (int i = 0; i < catlist.SelectedItems.Count; i++)
-                        {
-                            selectlist.Items.Add(catlist.SelectedItems[i]);
-                        }
-                        string query = "";
-                        query = "SELECT * FROM Business " +
-                            $"WHERE state = '{statelist.SelectedItem.ToString()}' " +
-                            $"AND city = '{citylist.SelectedItem.ToString()}' " +
-                            $"AND zipcode = {ziplist.SelectedItem.ToString()} ";
-                        for(int i = 0; i < selectlist.Items.Count; ++i)
-                        {
-                            query += $"AND Business.business_id IN (SELECT business_id FROM Categories WHERE category_name = '{selectlist.Items[i]}') ";
-                        }
-                        cmd.CommandText = query;
-
-                        try
-                        {
-                            var reader = cmd.ExecuteReader();
-                            while (reader.Read())
-                            {
-                                Business b = new Business()
-                                {
-                                    bid = reader.GetString(0),
-                                    name = reader.GetString(1),
-                                    address = reader.GetString(2),
-                                    city = reader.GetString(3),
-                                    state = reader.GetString(4),
-                                    postal_code = reader.GetInt32(5),
-                                    latitude = reader.GetDouble(6),
-                                    longitude = reader.GetDouble(7),
-                                    stars = reader.GetDouble(8),
-                                    checkin_count = reader.GetInt32(9),
-                                    tip_count = reader.GetInt32(10),
-                                    is_open = reader.GetBoolean(11),
-                                    is_visible = false
-                                };
-                                businessgrid.Items.Add(b);
-                            }
-                        }
-                        catch (NpgsqlException ex)
-                        {
-                            Console.WriteLine(ex.Message.ToString());
-                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
-                        }
-                        finally
-                        {
-                            connection.Close();
-                        }
+                        catlist.Items.Add(c);
                     }
                 }
-                
+                numbusinesses.Content = businessgrid.Items.Count;
             }
+        }
+
+        private void catlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            query_filters();
         }
 
         private void businessgrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -453,60 +380,147 @@ namespace WpfApp1
             this.Close();
         }
 
-
-
         /// <summary>
-        /// Filters business results by selected price range filters
+        /// Called whenever a filter box is checked. Creates a query string and updates the business table
+        /// with all qualifying businesses
         /// </summary>
         /// <param name="sender"></param>
-        /// /// <param name="e"></param>
-        private void money_filter(object sender, RoutedEventArgs e)
+        /// <param name="e"></param>
+        private void filter_changed(object sender, RoutedEventArgs e)
+        {
+            query_filters();
+        }
+
+        private void query_filters()
         {
             businessgrid.Items.Clear();
-
-            // Credit: https://stackoverflow.com/questions/18141957/how-to-check-if-any-checkbox-is-checked-in-grid-wpf
-            // checks of any price check boxes are clicked.
-            // This is needed since if no boxes are clicked, we don't want to apply any filter
-            if (innerprice.Children
-                           .OfType<CheckBox>()
-                           .Where(cb => (bool)cb.IsChecked).Count() != 0)
+            string query = "SELECT DISTINCT business_id FROM Business WHERE ";
+            string at = atcheck_query();
+            if (at != "")
             {
+                query += at + " AND ";
+            }
 
-                foreach (Business bus in _bus.Values)
-                    bus.is_visible = false;
+            string meal = meal_filter_query();
+            if (meal != "")
+            {
+                query += meal + " AND ";
+            }
 
-                foreach (CheckBox cb in innerprice.Children)
+            string price = price_filter_query();
+            if (price != "")
+            {
+                // trailing end is added here to ensure that following remove can always be called
+                query += price + " AND ";
+            }
+
+            // Filter categories
+            for (int i = 0; i < catlist.SelectedItems.Count; ++i)
+            {
+                selectlist.Items.Add(catlist.SelectedItems[i]);
+            }
+
+            for (int i = 0; i < selectlist.Items.Count; ++i)
+            {
+                query += $"business_id IN (SELECT business_id FROM Categories WHERE category_name = '{selectlist.Items[i]}') AND ";
+            }
+
+            query = query.Remove(query.Length - 4);
+
+            Trace.WriteLine(query);
+
+            using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
+            {
+                connection.Open();
+                using (var cmd = new NpgsqlCommand(query, connection))
                 {
-                    if (cb.IsChecked == true)
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        foreach (Business bus in _bus.Values)
+                        while (reader.Read())
                         {
-                            int? price = Convert.ToInt32(bus.get_attribute_val("RestaurantsPriceRange2"));
-                            if (price != null)
+                            if (_bus.ContainsKey(reader["business_id"] as string))
                             {
-                                if (price == cb.Content.ToString().Length)
-                                    bus.is_visible = true;
+                                businessgrid.Items.Add(_bus[reader["business_id"] as string]);
                             }
                         }
                     }
                 }
+                connection.Close();
             }
-            else
-            {
-                foreach (Business bus in _bus.Values)
-                    bus.is_visible = true;
-            }
-
-            fill_businessgrid();
+            numbusinesses.Content = businessgrid.Items.Count;
         }
 
-        private void fill_businessgrid()
+        /// <summary>
+        /// Creates a query string for all selected attribute filter boxes
+        /// </summary>
+        /// <returns>A query string</returns>
+        private string atcheck_query()
         {
-            foreach (Business bus in _bus.Values)
+            string query = "";
+            foreach (CheckBox cb in atcheck.Children)
             {
-                if (bus.is_visible == true)
-                    businessgrid.Items.Add(bus);
+                if (cb.IsChecked == true)
+                {
+                    if (cb.Name == "WiFi")
+                        query += $"business_id IN (SELECT business_id FROM Attributes WHERE attr_name = 'WiFi' AND val = 'free') AND ";
+                    else
+                        query += $"business_id IN (SELECT business_id FROM Attributes WHERE attr_name = '{cb.Name}') AND ";
+                }
             }
+            if (query != "")
+            {
+                query = query.Remove(query.Length - 4); // remove extra AND from end of string
+            }
+            return query;
+        }
+
+        /// <summary>
+        /// Creates a query string for all selected meal filter boxes
+        /// </summary>
+        /// <returns>A query string</returns>
+        private string meal_filter_query()
+        {
+            string query = "";
+
+            foreach (CheckBox cb in mealcheck.Children)
+            {
+                if (cb.IsChecked == true)
+                    query += $"business_id IN (SELECT business_id FROM Attributes WHERE attr_name = 'GoodForMeal_{cb.Name}') AND ";
+            }
+
+            if (query != "")
+            {
+                query = query.Remove(query.Length - 4); // remove extra AND at end of string
+            }
+
+
+            return query;
+        }
+
+        /// <summary>
+        /// Creates a query string for all selected price filter boxes
+        /// </summary>
+        /// <returns>A query string</returns>
+        private string price_filter_query()
+        {
+            string query = "";
+            foreach (CheckBox cb in innerprice.Children)
+            {
+                if (cb.IsChecked == true)
+                {
+                    if (query == "")
+                        query = " business_id IN (SELECT business_id FROM Attributes WHERE ";
+                    query += $" attr_name = 'RestaurantsPriceRange2' AND val = '{cb.Content.ToString().Length}' OR ";
+                }
+            }
+
+            if (query != "")
+            {
+                query = query.Remove(query.Length - 3);
+                query += ")";
+            }
+
+            return query;
         }
     }
 }

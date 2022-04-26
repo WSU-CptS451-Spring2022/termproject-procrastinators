@@ -64,8 +64,9 @@ def insert2Business(conn):
                     else: 
                         d = {k:v}
                     for k2, v2 in d.items():
-                        cur.execute("INSERT INTO Attributes (attr_name, val, business_id)"
-                                + f" VALUES ('{cleanStr4SQL(k2)}', '{v2}', '{data['business_id']}')")
+                        if v2 != "False":
+                            cur.execute("INSERT INTO Attributes (attr_name, val, business_id)"
+                                    + f" VALUES ('{cleanStr4SQL(k2)}', '{v2}','{data['business_id']}')")
             except Exception as e:
                 print("Insert into Attributes failed!", e)
 
