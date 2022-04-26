@@ -251,91 +251,10 @@ namespace WpfApp1
                 numbusinesses.Content = businessgrid.Items.Count;
             }
         }
+
         private void catlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            businessgrid.Items.Clear();
-            selectlist.Items.Clear();
-            if (catlist.SelectedIndex > -1)
-            {
-                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
-                {
-                    connection.Open();
-                    using (var cmd = new NpgsqlCommand())
-                    {
-                        /*
-                        string relation = "business", n = "business";
-                        
-                        if(nestedCommand != "")
-                        {
-                            relation = nestedCommand;
-                            n = "nested";
-                        }
-
-                        cmd.CommandText = "SELECT " + n + ".business_id, " + n + ".name, " + n + ".address, " + n + ".city, " + n + ".state, " + n + ".zipcode, " + n +
-                            ".latitude, " + n + ".longitude, " + n + ".stars, " + n + ".numCheckins, " + n + ".numTips, " + n + ".is_open, categories.category_name " +
-                            "FROM " + relation + ", categories " +
-                            "WHERE " + n + ".business_id = categories.business_id " +
-                            "AND " + n + ".state = '" + statelist.SelectedItem.ToString() + "' " +
-                            "AND " + n + ".city = '" + citylist.SelectedItem.ToString() + "' " +
-                            "AND " + n + ".zipcode = " + ziplist.SelectedItem.ToString() + " " +
-                            "AND categories.category_name = '" + catlist.SelectedItem.ToString() + "' " +
-                            "ORDER BY name";
-
-                        nestedCommand = "(" + cmd.CommandText + ") AS nested";
-                        */
-                        cmd.Connection = connection;
-                        for (int i = 0; i < catlist.SelectedItems.Count; i++)
-                        {
-                            selectlist.Items.Add(catlist.SelectedItems[i]);
-                        }
-                        string query = "";
-                        query = "SELECT * FROM Business " +
-                            $"WHERE state = '{statelist.SelectedItem.ToString()}' " +
-                            $"AND city = '{citylist.SelectedItem.ToString()}' " +
-                            $"AND zipcode = {ziplist.SelectedItem.ToString()} ";
-                        for(int i = 0; i < selectlist.Items.Count; ++i)
-                        {
-                            query += $"AND Business.business_id IN (SELECT business_id FROM Categories WHERE category_name = '{selectlist.Items[i]}') ";
-                        }
-                        cmd.CommandText = query;
-
-                        try
-                        {
-                            var reader = cmd.ExecuteReader();
-                            while (reader.Read())
-                            {
-                                Business b = new Business()
-                                {
-                                    bid = reader.GetString(0),
-                                    name = reader.GetString(1),
-                                    address = reader.GetString(2),
-                                    city = reader.GetString(3),
-                                    state = reader.GetString(4),
-                                    postal_code = reader.GetInt32(5),
-                                    latitude = reader.GetDouble(6),
-                                    longitude = reader.GetDouble(7),
-                                    stars = reader.GetDouble(8),
-                                    checkin_count = reader.GetInt32(9),
-                                    tip_count = reader.GetInt32(10),
-                                    is_open = reader.GetBoolean(11),
-                                    is_visible = false
-                                };
-                                businessgrid.Items.Add(b);
-                            }
-                        }
-                        catch (NpgsqlException ex)
-                        {
-                            Console.WriteLine(ex.Message.ToString());
-                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
-                        }
-                        finally
-                        {
-                            connection.Close();
-                        }
-                    }
-                }
-                numbusinesses.Content = businessgrid.Items.Count;
-            }
+            query_filters();
         }
 
         private void businessgrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -470,7 +389,6 @@ namespace WpfApp1
         private void filter_changed(object sender, RoutedEventArgs e)
         {
             query_filters();
-            numbusinesses.Content = businessgrid.Items.Count;
         }
 
         private void query_filters()
@@ -496,6 +414,17 @@ namespace WpfApp1
                 query += price + " AND ";
             }
 
+            // Filter categories
+            for (int i = 0; i < catlist.SelectedItems.Count; ++i)
+            {
+                selectlist.Items.Add(catlist.SelectedItems[i]);
+            }
+
+            for (int i = 0; i < selectlist.Items.Count; ++i)
+            {
+                query += $"business_id IN (SELECT business_id FROM Categories WHERE category_name = '{selectlist.Items[i]}') AND ";
+            }
+
             query = query.Remove(query.Length - 4);
 
             Trace.WriteLine(query);
@@ -518,6 +447,7 @@ namespace WpfApp1
                 }
                 connection.Close();
             }
+            numbusinesses.Content = businessgrid.Items.Count;
         }
 
         /// <summary>

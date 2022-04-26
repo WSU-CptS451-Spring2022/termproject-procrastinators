@@ -14,7 +14,7 @@
 
         <Label x:Name="numbusinesseslabel" Content="# of businesses: " FontSize="14" HorizontalAlignment="Left" Margin="263,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
         <Label x:Name="numbusinesses" Content="" FontSize="14" HorizontalAlignment="Left" Margin="374,12,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
-        <!--<DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="250,10,421,0" SelectionChanged="businessgrid_SelectionChanged" Height="451" VerticalAlignment="Top"/>-->
+
         <DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" AlternatingRowBackground="AliceBlue" Margin="250,41,421,0" SelectionChanged="businessgrid_SelectionChanged" Height="451" VerticalAlignment="Top">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Business Name" Binding = "{Binding name}" />
@@ -108,7 +108,7 @@
                 <Button x:Name="tipsbutton" Content="Show Tips" HorizontalAlignment="Left" Margin="406,41,0,0" VerticalAlignment="Top" Grid.Column="1" Click="tipsbutton_Click"/>
                 <TextBlock x:Name ="businessname" Grid.Column="1" HorizontalAlignment="Left" Margin="4,10,0,0" TextWrapping="Wrap" Text="Business Name" VerticalAlignment="Top"/>
                 <TextBlock x:Name="addy" Grid.Column="1" HorizontalAlignment="Left" Margin="5,30,0,0" TextWrapping="Wrap" Text="Address" VerticalAlignment="Top"/>
-                <TextBlock x:Name="opcl" Grid.Column="1" HorizontalAlignment="Left" Margin="3,53,0,0" TextWrapping="Wrap" Text="Today:Opens/Closes" VerticalAlignment="Top"/>
+                <TextBlock x:Name="opcl" Grid.Column="1" HorizontalAlignment="Left" Margin="3,53,0,0" TextWrapping="Wrap" Text="Today:" VerticalAlignment="Top"/>
                 <ListBox x:Name="selectcat" Grid.Column="2" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="14,35,170,9"/>
                 <ListBox x:Name="selectatt" Grid.Column="2" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="186,37,0,8"/>
                 <Label FontSize="14" Grid.Column="2" Content="Categories" HorizontalAlignment="Left" Margin="40,6,0,0" VerticalAlignment="Top" Width="97"/>
