@@ -11,8 +11,11 @@
         <Label x:Name="citylabel" FontSize="14" Content="City" HorizontalAlignment="Left" Margin="20,132,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.605,-1.27"/>
         <Label x:Name="ziplabel" FontSize="14" Content="ZIP Code" HorizontalAlignment="Left" Margin="4,257,0,0" VerticalAlignment="Top"/>
         <Label x:Name="catlabel" Content="Categories" FontSize="14" HorizontalAlignment="Left" Margin="-1,354,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
+
+        <Label x:Name="numbusinesseslabel" Content="# of businesses: " FontSize="14" HorizontalAlignment="Left" Margin="263,10,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
+        <Label x:Name="numbusinesses" Content="" FontSize="14" HorizontalAlignment="Left" Margin="374,12,0,0" VerticalAlignment="Top" RenderTransformOrigin="-13.508,-1"/>
         <!--<DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="250,10,421,0" SelectionChanged="businessgrid_SelectionChanged" Height="451" VerticalAlignment="Top"/>-->
-        <DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" AlternatingRowBackground="AliceBlue" Margin="250,10,421,0" SelectionChanged="businessgrid_SelectionChanged" Height="451" VerticalAlignment="Top">
+        <DataGrid x:Name="businessgrid" d:ItemsSource="{d:SampleData ItemCount=5}" AlternatingRowBackground="AliceBlue" Margin="250,41,421,0" SelectionChanged="businessgrid_SelectionChanged" Height="451" VerticalAlignment="Top">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Business Name" Binding = "{Binding name}" />
                 <DataGridTextColumn Header="Address" Binding = "{Binding address}" />
@@ -86,7 +89,7 @@
         <GroupBox x:Name="sortby" Header="Sort Results By:" FontSize="14" Margin="809,404,131,255">
             <ComboBox x:Name="sorted" HorizontalAlignment="Left" Margin="10,0,0,0" Width="223"/>
         </GroupBox>
-        <GroupBox x:Name="currentbusiness"  FontSize="14" Header="Selected Buisness" Margin="264,471,81,27" RenderTransformOrigin="0.5,0.5">
+        <GroupBox x:Name="currentbusiness"  FontSize="14" Header="Selected Buisness" Margin="264,491,81,7" RenderTransformOrigin="0.5,0.5">
             <GroupBox.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -95,7 +98,7 @@
                     <TranslateTransform X="-1.192"/>
                 </TransformGroup>
             </GroupBox.RenderTransform>
-            <Grid x:Name="selectedbusiness">
+            <Grid x:Name="selectedbusiness" Margin="-3,0,3,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="11*"/>
                     <ColumnDefinition Width="485*"/>

@@ -156,6 +156,7 @@ namespace WpfApp1
             catlist.Items.Clear();
             businessgrid.Items.Clear();
             _bus.Clear();
+            List<string> categories = new List<string>();
             nestedCommand = "";
 
             if (ziplist.SelectedIndex > -1)
@@ -207,7 +208,7 @@ namespace WpfApp1
                             while (reader.Read())
                             {
                                 _bus[reader["bid"] as string].insert_category(reader["c_name"] as string);
-                                catlist.Items.Add(reader["c_name"]);
+                                categories.Add(reader["c_name"] as string);
                             }
                         }
                     }
@@ -240,7 +241,14 @@ namespace WpfApp1
                     {
                         businessgrid.Items.Add(bus);
                     }
+
+                    categories = categories.Distinct().ToList();
+                    foreach (string c in categories)
+                    {
+                        catlist.Items.Add(c);
+                    }
                 }
+                numbusinesses.Content = businessgrid.Items.Count;
             }
         }
         private void catlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -326,7 +334,7 @@ namespace WpfApp1
                         }
                     }
                 }
-                
+                numbusinesses.Content = businessgrid.Items.Count;
             }
         }
 
@@ -461,6 +469,12 @@ namespace WpfApp1
         /// <param name="e"></param>
         private void filter_changed(object sender, RoutedEventArgs e)
         {
+            query_filters();
+            numbusinesses.Content = businessgrid.Items.Count;
+        }
+
+        private void query_filters()
+        {
             businessgrid.Items.Clear();
             string query = "SELECT DISTINCT business_id FROM Business WHERE ";
             string at = atcheck_query();
@@ -541,17 +555,12 @@ namespace WpfApp1
             foreach (CheckBox cb in mealcheck.Children)
             {
                 if (cb.IsChecked == true)
-                {
-                    if (query == "")
-                        query = " business_id IN (SELECT business_id FROM Attributes WHERE ";
-                    query += $"attr_name = 'GoodForMeal_{cb.Name}' OR ";
-                }
+                    query += $"business_id IN (SELECT business_id FROM Attributes WHERE attr_name = 'GoodForMeal_{cb.Name}') AND ";
             }
 
             if (query != "")
             {
-                query = query.Remove(query.Length - 3); // remove extra OR at end of string
-                query += ")";
+                query = query.Remove(query.Length - 4); // remove extra AND at end of string
             }
 
 
