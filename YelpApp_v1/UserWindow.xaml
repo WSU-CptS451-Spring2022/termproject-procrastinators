@@ -68,6 +68,7 @@
         <!-- Latest Tips Grid -->
         <Label x:Name="latesttipslabel" FontSize="14" Content="Latest tips of my friends" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,5,397,0" />
         <DataGrid x:Name="latesttipsgrid" FontSize="12" Margin="445,36,12,10" Width="543"/>
+        <Button x:Name="mainwindowbutton" Content="Main Window" HorizontalAlignment="Left" Margin="340,9,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.88,-0.213" Click="mainwindowbutton_Click"/>
 
     </Grid>
 </Window>

@@ -5,11 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="BusinessWindow" Height="450" Width="800">
+        Title="BusinessWindow" Height="600" Width="800">
     <Grid>
-        <DataGrid x:Name="tipgrid" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,120,10,10"/>
-        <TextBox x:Name="tipentry" HorizontalAlignment="Left" Margin="300,60,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="325" KeyDown="addTip_KeyDown"/>
-        <Label x:Name="tiplabel" Content="Enter Tip:" HorizontalAlignment="Left" Margin="240,56,0,0" VerticalAlignment="Top"/>
+        <DataGrid x:Name="tipgrid" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,120,10,206"/>
+        <Label x:Name="tiplabel" Content="Enter Tip:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <DataGrid x:Name="friendtipgrid" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,414,10,10"/>
+        <Label x:Name="tipgridlabel" Content="Tips:" HorizontalAlignment="Left" Margin="10,89,0,0" VerticalAlignment="Top" Width="35"/>
+        <Label x:Name="friendtipgridlabel" Content="Friend Tips:" HorizontalAlignment="Left" Margin="10,383,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="tiplikebutton" Content="Like Tip" HorizontalAlignment="Left" Margin="745,92,0,0" VerticalAlignment="Top" Click="tiplikebutton_Click"/>
+        <Button x:Name="friendtiplikebutton" Content="Like Tip" HorizontalAlignment="Left" Margin="745,386,0,0" VerticalAlignment="Top" Click="friendtiplikebutton_Click"/>
+        <TextBox x:Name="tipentry" HorizontalAlignment="Center" Margin="0,41,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="779" Height="43"/>
+        <Button x:Name="addtipbutton" Content="Add Tip" HorizontalAlignment="Left" Margin="744,16,0,0" VerticalAlignment="Top" Click="addtipbutton_Click"/>
 
 
     </Grid>

@@ -21,8 +21,7 @@ namespace WpfApp1
     /// </summary>
     public partial class UserWindow : Window
     {
-        User selectedUser;
-
+        static public User selectedUser = null;
         public UserWindow()
         {
             InitializeComponent();
@@ -33,6 +32,9 @@ namespace WpfApp1
             selectedUser = null;
         }
 
+        /// <summary>
+        /// DataGrid requires to be passed an object. This is used for the Latest Tips by Friends DataGrid
+        /// </summary>
         private class LatestPost
         {
             public string user_name { get; set; }
@@ -43,6 +45,9 @@ namespace WpfApp1
         }
         
 
+        /// <summary>
+        /// Add columns to the usr_id grid
+        /// </summary>
         private void addColumnsToUsrIdGrid()
         {
             DataGridTextColumn col1 = new DataGridTextColumn();
@@ -54,7 +59,10 @@ namespace WpfApp1
 
         
         
-
+        /// <summary>
+        /// Update the usr_id grid to display the usr_ids of people who have the passed name
+        /// </summary>
+        /// <param name="name"></param>
         private void updateUsridgrid(string name)
         {
             using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
@@ -103,6 +111,13 @@ namespace WpfApp1
             }
         }
         
+
+        /// <summary>
+        /// When a key is pressed in the enter name TextBox, check if the key pressed was Key.Enter.
+        /// If it was, update the usr_id grid to display the usr_ids of each User with that name
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void enterName_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -111,36 +126,26 @@ namespace WpfApp1
             }
         }
 
+
+        /// <summary>
+        /// When the selection in the usr_id grid is changed, update all displayed information for the newly selected user
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void usridgrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (usridgrid.SelectedItem != null)
-            { 
-                selectedUser = (User)usridgrid.SelectedItem;
-
-                // update the user info box
-                name.Content = selectedUser.name.ToString();
-                stars.Content = selectedUser.average_stars.ToString();
-                fans.Content = selectedUser.fans.ToString();
-                yelpingsince.Content = selectedUser.yelping_since.ToString();
-
-                funny.Content = selectedUser.funny.ToString();
-                cool.Content = selectedUser.cool.ToString();
-                useful.Content = selectedUser.useful.ToString();
-                
-                tipcount.Content = selectedUser.tipcount.ToString();
-                totaltiplikes.Content = selectedUser.totallikes.ToString();
-
-                latentry.Text = selectedUser.latitude.ToString();
-                longentry.Text = selectedUser.longitude.ToString();
-
-                // update the friends grid
-                updateFriendsGrid();
-                updateLatestTipsGrid();
+            {
+                updateSelectedUserInfo((User)usridgrid.SelectedItem);
             }
         }
 
-        
 
+        /// <summary>
+        /// On click of the location edit button, enable both the latitude and longitude TextBoxes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param> 
         private void editlocation(object sender, RoutedEventArgs e)
         {
             if (selectedUser != null)
@@ -150,6 +155,12 @@ namespace WpfApp1
             }
         }
 
+        /// <summary>
+        /// On click of the location update button, update the database to the newly entered latitude and longitude
+        /// for that user
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void updatelocation(object sender, RoutedEventArgs e)
         {
             if (selectedUser != null)
@@ -205,7 +216,7 @@ namespace WpfApp1
         }
 
         /// <summary>
-        /// Friends Grid Functions
+        /// Add columns to the friends DataGrid
         /// </summary>
         private void addColumnsToFriendsGrid()
         {
@@ -234,6 +245,9 @@ namespace WpfApp1
             friendsgrid.Columns.Add(yelpingSince_col);
         }
         
+        /// <summary>
+        /// Updates the friends DataGrid to display the friends of the selectedUser
+        /// </summary>
         private void updateFriendsGrid()
         {
             friendsgrid.Items.Clear();
@@ -280,6 +294,12 @@ namespace WpfApp1
             }
         }
 
+        /// <summary>
+        /// When a friend in the friend's DataGrid is clicked, update the window the display the information
+        /// for the newly selected user
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void friendsgrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             updateSelectedUserInfo((User)friendsgrid.SelectedItem);
@@ -288,7 +308,9 @@ namespace WpfApp1
             updateFriendsGrid();
         }
 
-        // Latest Tips Grid
+        /// <summary>
+        /// Adds columns to latestTip DataGrid
+        /// </summary>
         private void addColumnsToLatestTips()
         {
             
@@ -323,6 +345,9 @@ namespace WpfApp1
             latesttipsgrid.Columns.Add(date_col);
         }
 
+        /// <summary>
+        /// Finds the latest tips created from each of the selectedUsers friends and populates the Latest Tips DataGrid
+        /// </summary>
         private void updateLatestTipsGrid()
         {
             latesttipsgrid.Items.Clear();
@@ -371,7 +396,10 @@ namespace WpfApp1
             }
         }
 
-        // General Functions
+        /// <summary>
+        /// Updates all the displayed information of the selected user
+        /// </summary>
+        /// <param name="newSelection"></param>
         private void updateSelectedUserInfo(User newSelection)
         {
             if (newSelection != null)
@@ -401,7 +429,11 @@ namespace WpfApp1
                 updateLatestTipsGrid();
             }
         }
-
-   
+        private void mainwindowbutton_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow M = new MainWindow();
+            M.Show();
+            this.Close();
+        }
     }
 }
