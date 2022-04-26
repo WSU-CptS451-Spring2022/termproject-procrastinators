@@ -188,7 +188,7 @@ namespace WpfApp1
                                 newBus.tip_count = reader["numtips"] as int?;
                                 newBus.is_open = reader["is_open"] as bool?;
                                 newBus.is_visible = true;
-
+                                newBus.calc_distance(UserWindow.selectedUser);
                                 _bus.Add(newBus.bid, newBus);
                             }
                         }
@@ -453,60 +453,135 @@ namespace WpfApp1
             this.Close();
         }
 
-
-
         /// <summary>
-        /// Filters business results by selected price range filters
+        /// Called whenever a filter box is checked. Creates a query string and updates the business table
+        /// with all qualifying businesses
         /// </summary>
         /// <param name="sender"></param>
-        /// /// <param name="e"></param>
-        private void money_filter(object sender, RoutedEventArgs e)
+        /// <param name="e"></param>
+        private void filter_changed(object sender, RoutedEventArgs e)
         {
             businessgrid.Items.Clear();
-
-            // Credit: https://stackoverflow.com/questions/18141957/how-to-check-if-any-checkbox-is-checked-in-grid-wpf
-            // checks of any price check boxes are clicked.
-            // This is needed since if no boxes are clicked, we don't want to apply any filter
-            if (innerprice.Children
-                           .OfType<CheckBox>()
-                           .Where(cb => (bool)cb.IsChecked).Count() != 0)
+            string query = "SELECT DISTINCT business_id FROM Business WHERE ";
+            string at = atcheck_query();
+            if (at != "")
             {
+                query += at + " AND ";
+            }
 
-                foreach (Business bus in _bus.Values)
-                    bus.is_visible = false;
+            string meal = meal_filter_query();
+            if (meal != "")
+            {
+                query += meal + " AND ";
+            }
 
-                foreach (CheckBox cb in innerprice.Children)
+            string price = price_filter_query();
+            if (price != "")
+            {
+                // trailing end is added here to ensure that following remove can always be called
+                query += price + " AND ";
+            }
+
+            query = query.Remove(query.Length - 4);
+
+            Trace.WriteLine(query);
+
+            using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
+            {
+                connection.Open();
+                using (var cmd = new NpgsqlCommand(query, connection))
                 {
-                    if (cb.IsChecked == true)
+                    using (var reader = cmd.ExecuteReader())
                     {
-                        foreach (Business bus in _bus.Values)
+                        while (reader.Read())
                         {
-                            int? price = Convert.ToInt32(bus.get_attribute_val("RestaurantsPriceRange2"));
-                            if (price != null)
+                            if (_bus.ContainsKey(reader["business_id"] as string))
                             {
-                                if (price == cb.Content.ToString().Length)
-                                    bus.is_visible = true;
+                                businessgrid.Items.Add(_bus[reader["business_id"] as string]);
                             }
                         }
                     }
                 }
+                connection.Close();
             }
-            else
-            {
-                foreach (Business bus in _bus.Values)
-                    bus.is_visible = true;
-            }
-
-            fill_businessgrid();
         }
 
-        private void fill_businessgrid()
+        /// <summary>
+        /// Creates a query string for all selected attribute filter boxes
+        /// </summary>
+        /// <returns>A query string</returns>
+        private string atcheck_query()
         {
-            foreach (Business bus in _bus.Values)
+            string query = "";
+            foreach (CheckBox cb in atcheck.Children)
             {
-                if (bus.is_visible == true)
-                    businessgrid.Items.Add(bus);
+                if (cb.IsChecked == true)
+                {
+                    if (cb.Name == "WiFi")
+                        query += $"business_id IN (SELECT business_id FROM Attributes WHERE attr_name = 'WiFi' AND val = 'free') AND ";
+                    else
+                        query += $"business_id IN (SELECT business_id FROM Attributes WHERE attr_name = '{cb.Name}') AND ";
+                }
             }
+            if (query != "")
+            {
+                query = query.Remove(query.Length - 4); // remove extra AND from end of string
+            }
+            return query;
+        }
+
+        /// <summary>
+        /// Creates a query string for all selected meal filter boxes
+        /// </summary>
+        /// <returns>A query string</returns>
+        private string meal_filter_query()
+        {
+            string query = "";
+
+            foreach (CheckBox cb in mealcheck.Children)
+            {
+                if (cb.IsChecked == true)
+                {
+                    if (query == "")
+                        query = " business_id IN (SELECT business_id FROM Attributes WHERE ";
+                    query += $"attr_name = 'GoodForMeal_{cb.Name}' OR ";
+                }
+            }
+
+            if (query != "")
+            {
+                query = query.Remove(query.Length - 3); // remove extra OR at end of string
+                query += ")";
+            }
+
+
+            return query;
+        }
+
+        /// <summary>
+        /// Creates a query string for all selected price filter boxes
+        /// </summary>
+        /// <returns>A query string</returns>
+        private string price_filter_query()
+        {
+            string query = "";
+            foreach (CheckBox cb in innerprice.Children)
+            {
+                if (cb.IsChecked == true)
+                {
+                    if (query == "")
+                        query = " business_id IN (SELECT business_id FROM Attributes WHERE ";
+                    query += $" attr_name = 'RestaurantsPriceRange2' AND val = '{cb.Content.ToString().Length}' OR ";
+                }
+            }
+
+            if (query != "")
+            {
+                query = query.Remove(query.Length - 3);
+                query += ")";
+            }
+
+            return query;
         }
     }
 }

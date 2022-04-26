@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Device.Location;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,7 +45,9 @@ namespace WpfApp1
         public int? tip_count { get; set; }
         public bool? is_open { get; set; }
         public bool? is_visible { get; set; }
-        
+
+        public double? distance { get; set; }
+
         // dictonary of attributes. 
         // key      : category
         // value    : attribute value. Most are true/false, but since some aren't, this needs to be a string :(
@@ -87,6 +90,27 @@ namespace WpfApp1
                 return hrs[day];
             else return (null, null);
         }
+
+        public void calc_distance(User u)
+        {
+            if (u == null)
+            {
+                distance = null;
+                return;
+            }
+            if (u.latitude == null || u.longitude == null)
+            {
+                distance = null;
+                return;
+            }
+            else
+            {
+                // calc distance
+                var cord1 = new GeoCoordinate((double)u.latitude, (double)u.longitude);
+                var cord2 = new GeoCoordinate((double)latitude, (double)longitude);
+                distance = Math.Round(cord1.GetDistanceTo(cord2) / 1609.344, 2);
+            }
+        }
     }
 
 
@@ -103,7 +127,7 @@ namespace WpfApp1
     {
         private static string host = "localhost";
         private static string username = "postgres";
-        private static string password = "fabritzio";
+        private static string password = "123";
         private static string database = "yelpdb";
 
         public static string buildConnectionString()
