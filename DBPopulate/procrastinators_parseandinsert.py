@@ -51,7 +51,7 @@ def insert2Business(conn):
 
             try: # Insert hours
                 for k, v in data['hours'].items():
-                    cur.execute("INSERT INTO Hrs (dayofweek, close, open, business_id) "
+                    cur.execute("INSERT INTO Hrs (dayofweek, open, close, business_id) "
                             + f" VALUES ('{k}', '{v.split('-')[0]}', '{v.split('-')[1]}', '{data['business_id']}')")
             except Exception as e:
                 print("Insert into Hrs failed!", e)
@@ -64,8 +64,9 @@ def insert2Business(conn):
                     else: 
                         d = {k:v}
                     for k2, v2 in d.items():
-                        cur.execute("INSERT INTO Attributes (attr_name, val, business_id)"
-                                + f" VALUES ('{cleanStr4SQL(k2)}', '{v2}', '{data['business_id']}')")
+                        if v2 != "False":
+                            cur.execute("INSERT INTO Attributes (attr_name, val, business_id)"
+                                    + f" VALUES ('{cleanStr4SQL(k2)}', '{v2}','{data['business_id']}')")
             except Exception as e:
                 print("Insert into Attributes failed!", e)
 

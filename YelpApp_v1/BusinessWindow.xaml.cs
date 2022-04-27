@@ -26,17 +26,12 @@ namespace WpfApp1
             InitializeComponent();
             this.bid = String.Copy(bid);
             addColumnsToGrid();
+            addColumnsToFriendGrid();
             loadBusinessDetails();
+            loadFriendTips();
         }
 
-        public class Tip
-        {
-            public DateTime tipDate { get; set; } 
-            public string tipText { get; set; }
-            public int likes { get; set; }  
-            public string uid { get; set; }  
-            public string bid { get; set; }
-        }
+        
 
         private void addColumnsToGrid()
         {
@@ -58,11 +53,31 @@ namespace WpfApp1
             col3.Width = 150;
             tipgrid.Columns.Add(col3);
         }
+        private void addColumnsToFriendGrid()
+        {
+            DataGridTextColumn col1 = new DataGridTextColumn();
+            col1.Binding = new Binding("tipDate");
+            col1.Header = "Date";
+            col1.Width = 255;
+            friendtipgrid.Columns.Add(col1);
+
+            DataGridTextColumn col2 = new DataGridTextColumn();
+            col2.Binding = new Binding("tipText");
+            col2.Header = "Text";
+            col2.Width = 60;
+            friendtipgrid.Columns.Add(col2);
+
+            DataGridTextColumn col3 = new DataGridTextColumn();
+            col3.Binding = new Binding("likes");
+            col3.Header = "Likes";
+            col3.Width = 150;
+            friendtipgrid.Columns.Add(col3);
+        }
 
         private void loadBusinessDetails()
         {
             tipgrid.Items.Clear();
-            using (var connection = new NpgsqlConnection(buildConnectionString()))
+            using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
             {
                 connection.Open();
                 using (var cmd = new NpgsqlCommand())
@@ -97,17 +112,123 @@ namespace WpfApp1
             }
         }
 
-        private void addTip_KeyDown(object sender, KeyEventArgs e)
+        private void loadFriendTips()
         {
-            if (e.Key == Key.Enter)
+            friendtipgrid.Items.Clear();
+            if (UserWindow.selectedUser != null)
             {
-                using (var connection = new NpgsqlConnection(buildConnectionString()))
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
+                {
+                    connection.Open();
+                    List<User> userList = new List<User>();
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;                       
+                        cmd.CommandText = $"SELECT * FROM Usr WHERE usr_id IN (SELECT friend_for FROM Friend WHERE friend_of = '{UserWindow.selectedUser.usr_id}');";
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            try
+                            {
+                                while (reader.Read())
+                                {
+                                    User newUser = new User()
+                                    {
+                                        usr_id = reader["usr_id"].ToString(),
+                                        name = reader["name"].ToString(),
+                                        average_stars = reader["average_stars"] as double?,
+                                        fans = reader["fans"] as int?,
+                                        cool = reader["cool"] as int?,
+                                        funny = reader["funny"] as int?,
+                                        tipcount = reader["tipCount"] as int?,
+                                        totallikes = reader["totalLikes"] as int?,
+                                        useful = reader["useful"] as int?,
+                                        latitude = reader["latitude"] as double?,
+                                        longitude = reader["longitude"] as double?,
+                                        yelping_since = reader["yelping_since"] as DateTime?
+                                    };
+                                    userList.Add(newUser);
+                                }
+                            }
+                            catch (NpgsqlException ex)
+                            {
+                                Console.WriteLine(ex.Message);
+                                System.Windows.MessageBox.Show($"SQL Error - {ex.Message}");
+                            }
+                        }
+                    }
+                    foreach (User friend in userList)
+                    {
+                        using (var cmd = new NpgsqlCommand("SELECT * " +
+                                                "FROM Tip " +
+                                                $"WHERE usr_id = '{friend.usr_id}' " +                                                
+                                                $"AND business_id = '{bid}';", connection))
+                        {
+
+                            using (var reader = cmd.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    friendtipgrid.Items.Add(new Tip()
+                                    {
+                                        tipDate = reader["tipDate"] as DateTime?,
+                                        tipText = reader["tipText"] as string,
+                                        likes = reader["likes"] as int?,
+                                        uid = reader["usr_id"] as string,
+                                        bid = reader["business_id"] as string
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        private void addtipbutton_Click(object sender, RoutedEventArgs e)
+        {
+            if (tipentry.Text != "")
+            {
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
                 {
                     connection.Open();
                     using (var cmd = new NpgsqlCommand())
                     {
                         cmd.Connection = connection;
-                        cmd.CommandText = "INSERT INTO tip (tipDate, tipText, likes, usr_id, business_id) VALUES ( '2011-12-26 01:46:17', '" + tipentry.Text + "', 0, 'jRyO2V1pA4CdVVqCIOPc1Q', '" + bid + "')";
+                        cmd.CommandText = $"INSERT INTO tip (tipDate, tipText, likes, usr_id, business_id) VALUES ( '{DateTime.Now}', '{tipentry.Text}', 0, '{UserWindow.selectedUser.usr_id}', '{bid}')";
+                        try
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
+                        catch (NpgsqlException ex)
+                        {
+                            Console.WriteLine(ex.Message.ToString());
+                            System.Windows.MessageBox.Show($"SQL Error - {ex.Message.ToString()}");
+                        }
+                        finally
+                        {
+                            connection.Close();
+                        }
+                    }
+                }
+                tipentry.Clear();
+            }
+            loadBusinessDetails();
+        }
+
+        private void tiplikebutton_Click(object sender, RoutedEventArgs e)
+        {
+            if (tipgrid.SelectedItems.Count != 0)
+            {
+                Tip T = tipgrid.Items[tipgrid.SelectedIndex] as Tip;
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
+                {
+                    connection.Open();
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        cmd.CommandText = $"UPDATE Tip SET likes = likes + 1 WHERE business_id = '{T.bid}' AND usr_id = '{T.uid}' AND tipDate = '{T.tipDate}'";
                         try
                         {
                             cmd.ExecuteNonQuery();
@@ -127,9 +248,35 @@ namespace WpfApp1
             loadBusinessDetails();
         }
 
-        private string buildConnectionString()
+        private void friendtiplikebutton_Click(object sender, RoutedEventArgs e)
         {
-            return "Host = localhost; Username = postgres; Database =yelpdb; password = fabritzio";
+            if(tipgrid.SelectedItems.Count != 0)
+            { 
+                Tip T = friendtipgrid.Items[friendtipgrid.SelectedIndex] as Tip;
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
+                {
+                    connection.Open();
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        cmd.CommandText = $"UPDATE Tip SET likes = likes + 1 WHERE business_id = '{T.bid}' AND usr_id = '{T.uid}' AND tipDate = {T.tipDate}";
+                        try
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
+                        catch (NpgsqlException ex)
+                        {
+                            Console.WriteLine(ex.Message.ToString());
+                            System.Windows.MessageBox.Show($"SQL Error - {ex.Message.ToString()}");
+                        }
+                        finally
+                        {
+                            connection.Close();
+                        }
+                    }
+                }
+            }
+            loadFriendTips();
         }
     }
 }

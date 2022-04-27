@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Data;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +23,11 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        // List of businesses to insert
+        Dictionary<string, Business> _bus = new Dictionary<string, Business>();
+        int numPriceBoxesSelected = 0;
+
         public class Buffer
         {
             public string name { get; set; }
@@ -32,36 +39,21 @@ namespace WpfApp1
 
         public string nestedCommand = "";
 
-        public class Business
-        {
-            public string bid { get; set; }
-            public string name { get; set; }
-            public string address { get; set; }
-            public string city { get; set; }
-            public string state { get; set; }
-            public int postal_code { get; set; }
-            public double latitude { get; set; }
-            public double longitude { get; set; }
-            public double stars { get; set; }
-            public int checkin_count { get; set; }
-            public int tip_count { get; set; }
-            public bool is_open { get; set; }
-        }
-
         public MainWindow()
         {
             InitializeComponent();
             addState();
-            addColumnsToGrid();
-        }
-        private string buildConnectionString()
-        {
-            return "Host = localhost; Username = postgres; Database =yelpdb; password = fabritzio";
+            //addColumnsToGrid();
+            sorted.Items.Add("Name(default)");
+            sorted.Items.Add("Highest Rated");
+            sorted.Items.Add("Most Number of Tips");
+            sorted.Items.Add("Most Checkins");
+            sorted.Items.Add("Nearest");
         }
 
         private void addState()
         {
-            using (var connection = new NpgsqlConnection(buildConnectionString()))
+            using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
             {
                 connection.Open();
                 using (var cmd = new NpgsqlCommand())
@@ -96,7 +88,7 @@ namespace WpfApp1
             {
 
 
-                using (var connection = new NpgsqlConnection(buildConnectionString()))
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
                 {
                     connection.Open();
                     using (var cmd = new NpgsqlCommand())
@@ -130,7 +122,7 @@ namespace WpfApp1
             ziplist.Items.Clear();
             if (citylist.SelectedIndex > -1)
             {
-                using (var connection = new NpgsqlConnection(buildConnectionString()))
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
                 {
                     connection.Open();
                     using (var cmd = new NpgsqlCommand())
@@ -159,179 +151,192 @@ namespace WpfApp1
             }
         }
 
-        private void addColumnsToGrid()
-        {
-            DataGridTextColumn col1 = new DataGridTextColumn();
-            col1.Binding = new Binding("name");
-            col1.Header = "Buisness Name";
-            col1.Width = 255;
-            businessgrid.Columns.Add(col1);
-
-            DataGridTextColumn col2 = new DataGridTextColumn();
-            col2.Binding = new Binding("address");
-            col2.Header = "Address";
-            col2.Width = 60;
-            businessgrid.Columns.Add(col2);
-
-            DataGridTextColumn col3 = new DataGridTextColumn();
-            col3.Binding = new Binding("stars");
-            col3.Header = "Stars";
-            col3.Width = 150;
-            businessgrid.Columns.Add(col3);
-
-            DataGridTextColumn col4 = new DataGridTextColumn();
-            col4.Binding = new Binding("tip_count");
-            col4.Header = "Tips";
-            col4.Width = 0;
-            businessgrid.Columns.Add(col4);
-        }
-
         private void ziplist_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             catlist.Items.Clear();
             businessgrid.Items.Clear();
+            _bus.Clear();
+            List<string> categories = new List<string>();
             nestedCommand = "";
 
             if (ziplist.SelectedIndex > -1)
             {
-                using (var connection = new NpgsqlConnection(buildConnectionString()))
+                using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
                 {
-                    connection.Open();
-                    using (var cmd1 = new NpgsqlCommand())
+                    using (var cmd1 = new NpgsqlCommand("SELECT * FROM Business " +
+                                                       $"WHERE state = '{statelist.SelectedItem.ToString()}' AND " +
+                                                             $"city = '{citylist.SelectedItem.ToString()}' AND " +
+                                                             $"zipcode = '{ziplist.SelectedItem.ToString()}' " +
+                                                       $"ORDER BY name", connection))
                     {
-                        cmd1.Connection = connection;
-                        cmd1.CommandText = "SELECT * FROM business " +
-                            "WHERE state = '"+ statelist.SelectedItem.ToString()+"' " +
-                            "AND city = '"+ citylist.SelectedItem.ToString()+"' " +
-                            "AND zipcode = "+ziplist.SelectedItem.ToString() +" " +
-                            "ORDER BY name";
-                        try
+                        connection.Open();
+                        using (NpgsqlDataReader reader = cmd1.ExecuteReader())
                         {
-                            var reader = cmd1.ExecuteReader();
                             while (reader.Read())
                             {
-                                businessgrid.Items.Add(new Business()
+                                Business newBus = new Business();
+
+                                newBus.bid = reader["business_id"] as string;
+                                newBus.name = reader["name"] as string;
+                                newBus.address = reader["address"] as string;
+                                newBus.city = reader["city"] as string;
+                                newBus.state = reader["state"] as string;
+                                newBus.postal_code = reader["zipcode"] as int?;
+                                newBus.latitude = reader["latitude"] as double?;
+                                newBus.longitude = reader["longitude"] as double?;
+                                newBus.stars = reader["stars"] as double?;
+                                newBus.checkin_count = reader["numcheckins"] as int?;
+                                newBus.tip_count = reader["numtips"] as int?;
+                                newBus.is_open = reader["is_open"] as bool?;
+                                newBus.is_visible = true;
+                                
+                                _bus.Add(newBus.bid, newBus);
+                            }
+                        }
+                    }
+
+                    using (var cmd2 = new NpgsqlCommand("SELECT distinct category_name as c_name, business.business_id as bid " +
+                                                        "FROM categories, business " +
+                                                        $"WHERE categories.business_id = business.business_id AND " +
+                                                              $"business.state = '{statelist.SelectedItem.ToString()}' AND " +
+                                                              $"business.city = '{citylist.SelectedItem.ToString()}' AND " +
+                                                              $"business.zipcode = '{ziplist.SelectedItem.ToString()}' " +
+                                                        $"ORDER BY categories.category_name", connection))
+                    {
+                        using (NpgsqlDataReader reader = cmd2.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                categories.Add(reader["c_name"] as string);
+                            }
+                        }
+                    }
+
+                    User u = UserWindow.selectedUser;
+                    foreach (Business bus in _bus.Values)
+                    {
+                        if (u != null)
+                        {
+                            if (u.latitude != null && u.longitude != null)
+                            {
+                                // This way of finding the distance was found here : https://stackoverflow.com/questions/61135374/postgresql-calculate-distance-between-two-points-without-using-postgis
+                                using (var cmd = new NpgsqlCommand($"SELECT SQRT(POW(69.1 * (B.latitude - {u.latitude}), 2) " +
+                                                                             $"+ POW(69.1 * ({u.longitude} - B.longitude) * COS(B.latitude / 57.3), 2)) as distance " +
+                                                                   "FROM Business AS B " +
+                                                                   $"WHERE B.business_id = '{bus.bid}';", connection))
                                 {
-                                    bid = reader.GetString(0),
-                                    name = reader.GetString(1),
-                                    address = reader.GetString(2),
-                                    city = reader.GetString(3),
-                                    state = reader.GetString(4),
-                                    postal_code = reader.GetInt32(5),
-                                    latitude = reader.GetDouble(6),
-                                    longitude = reader.GetDouble(7),
-                                    stars = reader.GetDouble(8),
-                                    checkin_count = reader.GetInt32(9),
-                                    tip_count = reader.GetInt32(10),
-                                    is_open = reader.GetBoolean(11)
-                                });
+                                    using (var reader = cmd.ExecuteReader())
+                                    {
+                                        if (reader.Read())
+                                        {
+                                            bus.distance = Math.Round((double)(reader["distance"] as double?), 2);
+                                        }
+                                    }
+                                }
+
                             }
                         }
-                        catch (NpgsqlException ex)
+                        using (var cmd = new NpgsqlCommand("SELECT * " +
+                                                           "FROM Hrs " +
+                                                          $"WHERE business_id = '{bus.bid}';", connection))
                         {
-                            Console.WriteLine(ex.Message.ToString());
-                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
-                        }
-                        finally
-                        {
-                            connection.Close();
-                        }
-                    }
-
-                    connection.Open();
-                    using (var cmd2 = new NpgsqlCommand())
-                    {
-                        cmd2.Connection = connection;
-                        cmd2.CommandText = "SELECT distinct category_name FROM categories, business WHERE categories.business_id = business.business_id AND business.state = '" + statelist.SelectedItem.ToString() + "' AND business.city = '" + citylist.SelectedItem.ToString() + "' AND business.zipcode = " + ziplist.SelectedItem.ToString() + " ORDER BY categories.category_name";
-                        try
-                        {
-                            var reader = cmd2.ExecuteReader();
-                            while (reader.Read())
+                            using (var reader = cmd.ExecuteReader())
                             {
-                                catlist.Items.Add(reader.GetString(0));
+                                while (reader.Read())
+                                    bus.insert_hours(reader["dayofweek"] as string, reader["open"] as TimeSpan?, reader["close"] as TimeSpan?);
                             }
                         }
-                        catch (NpgsqlException ex)
-                        {
-                            Console.WriteLine(ex.Message.ToString());
-                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
-                        }
-                        finally
-                        {
-                            connection.Close();
-                        }
                     }
-                }
-            }
-        }
-        private void catlist_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            businessgrid.Items.Clear();
-            if (catlist.SelectedIndex > -1)
-            {
-                using (var connection = new NpgsqlConnection(buildConnectionString()))
-                {
-                    connection.Open();
-                    using (var cmd = new NpgsqlCommand())
+
+                    
+
+                    categories = categories.Distinct().ToList();
+                    foreach (string c in categories)
                     {
-                        string relation = "business", n = "business";
-                        cmd.Connection = connection;
-                        if(nestedCommand != "")
-                        {
-                            relation = nestedCommand;
-                            n = "nested";
-                        }
-
-                        cmd.CommandText = "SELECT " + n + ".business_id, " + n + ".name, " + n + ".address, " + n + ".city, " + n + ".state, " + n + ".zipcode, " + n +
-                            ".latitude, " + n + ".longitude, " + n + ".stars, " + n + ".numCheckins, " + n + ".numTips, " + n + ".is_open, categories.category_name " +
-                            "FROM " + relation + ", categories " +
-                            "WHERE " + n + ".business_id = categories.business_id " +
-                            "AND " + n + ".state = '" + statelist.SelectedItem.ToString() + "' " +
-                            "AND " + n + ".city = '" + citylist.SelectedItem.ToString() + "' " +
-                            "AND " + n + ".zipcode = " + ziplist.SelectedItem.ToString() + " " +
-                            "AND categories.category_name = '" + catlist.SelectedItem.ToString() + "' " +
-                            "ORDER BY name";
-
-                        nestedCommand = "(" + cmd.CommandText + ") AS nested";
-                        try
-                        {
-                            var reader = cmd.ExecuteReader();
-                            while (reader.Read())
-                            {
-                                Business b = new Business()
-                                {
-                                    bid = reader.GetString(0),
-                                    name = reader.GetString(1),
-                                    address = reader.GetString(2),
-                                    city = reader.GetString(3),
-                                    state = reader.GetString(4),
-                                    postal_code = reader.GetInt32(5),
-                                    latitude = reader.GetDouble(6),
-                                    longitude = reader.GetDouble(7),
-                                    stars = reader.GetDouble(8),
-                                    checkin_count = reader.GetInt32(9),
-                                    tip_count = reader.GetInt32(10),
-                                    is_open = reader.GetBoolean(11)
-                                };
-                                businessgrid.Items.Add(b);
-                            }
-                        }
-                        catch (NpgsqlException ex)
-                        {
-                            Console.WriteLine(ex.Message.ToString());
-                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
-                        }
-                        finally
-                        {
-                            connection.Close();
-                        }
+                        catlist.Items.Add(c);
                     }
+
+                    query_filters();
                 }
-                
+                numbusinesses.Content = businessgrid.Items.Count;
             }
         }
 
         private void businessgrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            selectcat.Items.Clear();
+            selectatt.Items.Clear();
+            if (businessgrid.SelectedIndex >= 0)
+            {
+                Business test = businessgrid.SelectedItem as Business;
+                businessname.Text = test.name;
+                
+                addy.Text = test.address;
+                (TimeSpan?, TimeSpan?) hrs = test.get_hrs_of_day(DateTime.Today.DayOfWeek.ToString());
+                if (hrs.Item1 != null && hrs.Item2 != null)
+                {
+                    opcl.Text = $"Today ( {DateTime.Today.DayOfWeek} ) : {hrs.Item1.ToString()} {hrs.Item2.ToString()}";
+                }
+                else
+                    opcl.Text = $"Today ( {DateTime.Today.DayOfWeek} ) : Closed";
+
+
+                using (var connection1 = new NpgsqlConnection(DBInfo.buildConnectionString()))
+                {
+                    connection1.Open();
+                    using (var cmd1 = new NpgsqlCommand())
+                    {
+                        cmd1.Connection = connection1;
+                        cmd1.CommandText = "SELECT category_name FROM categories WHERE business_id = '" + test.bid + "'";
+                        try
+                        {
+                            var reader1 = cmd1.ExecuteReader();
+                            while (reader1.Read())
+                            {
+                                selectcat.Items.Add(reader1.GetString(0));
+                            }
+                        }
+                        catch (NpgsqlException ex)
+                        {
+                            Console.WriteLine(ex.Message.ToString());
+                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
+                        }
+                        finally
+                        {
+                            connection1.Close();
+                        }
+                    }
+                }
+                using (var connection2 = new NpgsqlConnection(DBInfo.buildConnectionString()))
+                {
+                    connection2.Open();
+                    using (var cmd2 = new NpgsqlCommand())
+                    {
+                        cmd2.Connection = connection2;
+                        cmd2.CommandText = "SELECT attr_name FROM attributes WHERE business_id = '" + test.bid + "' AND val = 'True'";
+                        try
+                        {
+                            var reader2 = cmd2.ExecuteReader();
+                            while (reader2.Read())
+                            {
+                                selectatt.Items.Add(reader2.GetString(0));
+                            }
+                        }
+                        catch (NpgsqlException ex)
+                        {
+                            Console.WriteLine(ex.Message.ToString());
+                            System.Windows.MessageBox.Show("SQL Error - " + ex.Message.ToString());
+                        }
+                        finally
+                        {
+                            connection2.Close();
+                        }
+                    }
+                }
+            }
+        }
+        
+        private void tipsbutton_Click(object sender, EventArgs e)
         {
             if (businessgrid.SelectedIndex >= 0)
             {
@@ -343,5 +348,225 @@ namespace WpfApp1
                 }
             }
         }
+
+        private void checkinsbutton_Click(object sender, EventArgs e)
+        {
+            if (businessgrid.SelectedIndex >= 0)
+            {
+                Business B = businessgrid.Items[businessgrid.SelectedIndex] as Business;
+                if ((B.bid != null) && (B.bid.ToString().CompareTo("") != 0))
+                {
+                    CheckInWindow BW = new CheckInWindow(B.bid.ToString());
+                    BW.Show();
+                }
+            }
+        }
+
+        private void switchToUserWindow(object sender, RoutedEventArgs e)
+        {
+            UserWindow UW = new UserWindow();
+            UW.Show();
+            this.Close();
+        }
+
+        /// <summary>
+        /// Called whenever a filter box is checked. Creates a query string and updates the business table
+        /// with all qualifying businesses
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void filter_changed(object sender, RoutedEventArgs e)
+        {
+            query_filters();
+        }
+
+        /// <summary>
+        /// This entire function is an abomination. I'm sorry in advance to whoever has to read this.
+        /// </summary>
+        private void query_filters()
+        {
+            businessgrid.Items.Clear();
+            string query = "SELECT DISTINCT * FROM Business WHERE ";
+            bool filter_added = false;
+            string at = atcheck_query();
+            if (at != "")
+            {
+                query += at + " AND ";
+                filter_added = true;
+            }
+
+            string meal = meal_filter_query();
+            if (meal != "")
+            {
+                query += meal + " AND ";
+                filter_added = true;
+            }
+
+            string price = price_filter_query();
+            if (price != "")
+            {
+                query += price + " AND ";
+                filter_added = true;
+            }
+
+            // Filter categories
+            for (int i = 0; i < selectlist.Items.Count; ++i)
+            {
+                query += $"business_id IN (SELECT business_id FROM Categories WHERE category_name = '{selectlist.Items[i]}') AND ";
+                filter_added = true;
+            }
+
+            // This removes either the trailing AND or, in the case of no filters being added, removes the WHERE (not removing the where will
+            //                                                                                                    cause a crash when adding ORDER BY)
+            if (filter_added == true)
+                query = query.Remove(query.Length - 4);
+            else
+                query = query.Remove(query.Length - 6);
+
+            // add order by
+            if (sorted.SelectedItem.ToString() == "Highest Rated")
+                query += " ORDER BY stars DESC";
+            else if (sorted.SelectedItem.ToString() == "Most Number of Tips")
+                query += " ORDER BY numTips DESC";
+            else if (sorted.SelectedItem.ToString() == "Most Checkins")
+                query += " ORDER BY numCheckins DESC";
+            else if (sorted.SelectedItem.ToString() == "Nearest") // I'm sorry
+            {
+                User u = UserWindow.selectedUser;
+                if (u != null)
+                {
+                    if (u.latitude != null && u.longitude != null)
+                    {
+                        int i = query.IndexOf("*");
+                        query = query.Insert(i + 1, $", SQRT(POW(69.1 * (Business.latitude - {u.latitude}), 2) + POW(69.1 * ({u.longitude} - Business.longitude) * COS(Business.latitude / 57.3), 2)) as distance ");
+                        query += " ORDER BY distance";
+                    }
+                }
+            }
+            else
+                query += " ORDER BY name ASC";
+
+            using (var connection = new NpgsqlConnection(DBInfo.buildConnectionString()))
+            {
+                connection.Open();
+                using (var cmd = new NpgsqlCommand(query, connection))
+                {
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            if (_bus.ContainsKey(reader["business_id"] as string))
+                            {
+                                businessgrid.Items.Add(_bus[reader["business_id"] as string]);
+                            }
+                        }
+                    }
+                }
+                connection.Close();
+            }
+            numbusinesses.Content = businessgrid.Items.Count;
+        }
+
+        /// <summary>
+        /// Creates a query string for all selected attribute filter boxes
+        /// </summary>
+        /// <returns>A query string</returns>
+        private string atcheck_query()
+        {
+            string query = "";
+            foreach (CheckBox cb in atcheck.Children)
+            {
+                if (cb.IsChecked == true)
+                {
+                    if (cb.Name == "WiFi")
+                        query += $"business_id IN (SELECT business_id FROM Attributes WHERE attr_name = 'WiFi' AND val = 'free') AND ";
+                    else
+                        query += $"business_id IN (SELECT business_id FROM Attributes WHERE attr_name = '{cb.Name}') AND ";
+                }
+            }
+            if (query != "")
+            {
+                query = query.Remove(query.Length - 4); // remove extra AND from end of string
+            }
+            return query;
+        }
+
+        /// <summary>
+        /// Creates a query string for all selected meal filter boxes
+        /// </summary>
+        /// <returns>A query string</returns>
+        private string meal_filter_query()
+        {
+            string query = "";
+
+            foreach (CheckBox cb in mealcheck.Children)
+            {
+                if (cb.IsChecked == true)
+                    query += $"business_id IN (SELECT business_id FROM Attributes WHERE attr_name = 'GoodForMeal_{cb.Name}') AND ";
+            }
+
+            if (query != "")
+            {
+                query = query.Remove(query.Length - 4); // remove extra AND at end of string
+            }
+
+
+            return query;
+        }
+
+        /// <summary>
+        /// Creates a query string for all selected price filter boxes
+        /// </summary>
+        /// <returns>A query string</returns>
+        private string price_filter_query()
+        {
+            string query = "";
+            foreach (CheckBox cb in innerprice.Children)
+            {
+                if (cb.IsChecked == true)
+                {
+                    if (query == "")
+                        query = " business_id IN (SELECT business_id FROM Attributes WHERE ";
+                    query += $" attr_name = 'RestaurantsPriceRange2' AND val = '{cb.Content.ToString().Length}' OR ";
+                }
+            }
+
+            if (query != "")
+            {
+                query = query.Remove(query.Length - 3);
+                query += ")";
+            }
+
+            return query;
+        }
+
+        private void sorted_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            query_filters();
+        }
+
+        private void addbutton_Click(object sender, RoutedEventArgs e)
+        {
+            if (catlist.SelectedItem != null)
+            {
+                foreach (string s in selectlist.Items )
+                {
+                    if (s == catlist.SelectedItem.ToString())
+                        return;
+                }
+                selectlist.Items.Add(catlist.SelectedItem);
+                query_filters();
+            }
+        }
+
+        private void removebutton_Click(object sender, RoutedEventArgs e)
+        {
+            if (selectlist.SelectedItem != null)
+            {
+                selectlist.Items.Remove(selectlist.SelectedItem);
+                query_filters();
+            }
+        }
     }
 }
+
