@@ -1,8 +1,13 @@
-# termproject-procrastinators
+# Term Project (Team Procractinators)
 ![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 ![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+
+## Group Members
+[Ethan Nelson](https://github.com/ENelson526)<br>
+[Killian Griffin](https://github.com/killiangriffin00)<br>
+[Jacob Smith](https://github.com/jacobsmith3)
 
 ## Setup Instructions
 NOTE : The commands in this file and scripts in the repository only work on Windows. The program should still run on UNIX systems, but these instructions will not be sufficient.
